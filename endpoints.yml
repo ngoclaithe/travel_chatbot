@@ -1,0 +1,12 @@
+action_endpoint:
+  url: "http://localhost:5055/webhook"
+
+tracker_store:
+  type: sql
+  dialect: "postgresql"
+  url: "localhost"
+  port: 5432
+  db: "travel_chatbot"
+  username: "postgres"
+  password: "test1234"
+  login_db: "travel_chatbot"

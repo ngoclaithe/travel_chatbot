@@ -1,0 +1,647 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - xin chào
+    - chào bạn
+    - hello
+    - hi
+    - chào buổi sáng
+    - chào buổi chiều
+    - chào em
+    - chào anh
+    - hey
+    - hola
+    - good morning
+    - xin chào bot
+    - chào chatbot
+    - alo
+    - có ai không
+    - bot ơi
+
+- intent: goodbye
+  examples: |
+    - tạm biệt
+    - bye bye
+    - hẹn gặp lại
+    - goodbye
+    - see you
+    - cảm ơn nhé
+    - cảm ơn bạn
+    - ok cảm ơn
+    - đủ rồi cảm ơn
+    - thế thôi
+    - tạm biệt nhé
+    - bye
+    - tạm biệt bạn
+
+- intent: affirm
+  examples: |
+    - đúng rồi
+    - đúng
+    - chính xác
+    - ok
+    - okey
+    - được
+    - được rồi
+    - ừ
+    - ừm
+    - có
+    - yes
+    - yeah
+    - yep
+    - đồng ý
+    - chấp nhận
+    - ok luôn
+    - oke bạn
+    - được chứ
+
+- intent: deny
+  examples: |
+    - không
+    - không phải
+    - ko
+    - no
+    - nope
+    - không đúng
+    - sai rồi
+    - không đồng ý
+    - từ chối
+    - thôi
+    - không cần
+    - bỏ qua
+    - không muốn
+    - hủy
+
+- intent: thank
+  examples: |
+    - cảm ơn
+    - thanks
+    - thank you
+    - cám ơn nhiều
+    - cảm ơn bạn
+    - cảm ơn nhé
+    - thanks bạn
+    - thank bạn
+    - cảm ơn rất nhiều
+    - cảm ơn bot
+
+- intent: search_destination
+  examples: |
+    - tìm [điểm du lịch](category) ở [Đà Nẵng](province)
+    - cho tôi xem các [bãi biển](category) đẹp
+    - [địa điểm du lịch](category) ở [miền Trung](region)
+    - tìm [điểm tham quan](category) ở [Hà Nội](province)
+    - du lịch [Phú Quốc](destination)
+    - có [điểm nào](category) hay ở [Sapa](destination)
+    - muốn đi [biển](category)
+    - [núi](category) nào đẹp
+    - địa điểm du lịch [miền Bắc](region)
+    - cho tôi gợi ý [điểm đến](category) ở [Việt Nam](region)
+    - nên đi đâu ở [miền Nam](region)
+    - [thành phố](category) nào đáng đi
+    - [điểm du lịch sinh thái](category) ở [Tây Nguyên](region)
+    - [khu du lịch](category) nổi tiếng ở [Quảng Ninh](province)
+    - muốn đi [vùng núi](category)
+    - [phố cổ](category) ở đâu đẹp
+    - tìm [thác nước](category) đẹp
+    - [hang động](category) nổi tiếng
+    - [làng nghề](category) truyền thống
+    - [đảo](category) đẹp ở Việt Nam
+    - nơi nào có [cảnh đẹp](category)
+    - [resort](category) nghỉ dưỡng
+    - tìm [suối nước nóng](category)
+    - [vườn quốc gia](category) nào đẹp
+    - [di tích lịch sử](category) ở [Huế](province)
+    - các [danh lam thắng cảnh](category) nổi tiếng
+    - [bãi tắm](category) sạch đẹp
+    - [đèo](category) đẹp nhất
+    - nên đi [Nha Trang](destination) hay [Vũng Tàu](destination)
+    - so sánh [Đà Lạt](destination) với [Sapa](destination)
+    - [chùa](category) linh thiêng
+    - [khu vui chơi](category) cho gia đình
+    - [công viên](category) đẹp
+    - nơi [chụp ảnh](category) đẹp
+    - [homestay](category) view đẹp
+    - địa điểm [camping](category)
+    - [cồn cát](category) ở đâu
+    - [rừng nguyên sinh](category)
+    - muốn [trekking](category) ở đâu
+    - [cao nguyên](category) nào hay
+    - [vịnh](category) đẹp nhất
+    - tìm [biển hoang sơ](category)
+    - [đầm](category) nước ngọt
+    - [dãy núi](category) hùng vĩ
+    - [thảo nguyên](category) xanh mướt
+
+- intent: search_hotel
+  examples: |
+    - tìm [khách sạn](category) ở [Đà Nẵng](destination)
+    - [hotel](category) [5 sao](star_rating) ở [Hội An](destination)
+    - [khách sạn giá rẻ](price_range) tại [Nha Trang](destination)
+    - có [khách sạn](category) nào [giá trung bình](price_range) ở [Hà Nội](destination)
+    - tìm nơi ở tại [Phú Quốc](destination)
+    - [resort](category) [cao cấp](price_range) ở [Đà Lạt](destination)
+    - cho tôi xem [khách sạn 4 sao](star_rating) ở [Vũng Tàu](destination)
+    - chỗ ở [bình dân](price_range) ở [Sapa](destination)
+    - [homestay](category) ở [Hội An](destination)
+    - [villa](category) cho gia đình tại [Phú Quốc](destination)
+    - [khách sạn](category) gần [biển](location) ở [Đà Nẵng](destination)
+    - [resort 5 sao](star_rating) [view biển](amenities) tại [Nha Trang](destination)
+    - [nhà nghỉ](category) [rẻ](price_range) ở [Sài Gòn](destination)
+    - [khách sạn boutique](category) ở [phố cổ](location)
+    - chỗ ngủ [dưới 500k](price_range) ở [Đà Lạt](destination)
+    - [khách sạn](category) có [bể bơi](amenities)
+    - nơi ở có [ăn sáng miễn phí](amenities)
+    - [hotel](category) gần [sân bay](location)
+    - [resort](category) có [spa](amenities)
+    - [khách sạn](category) [trung tâm thành phố](location)
+    - [hostel](category) cho [backpacker](traveler_type)
+    - [villa biệt lập](category) ở [Phú Quốc](destination)
+    - [bungalow](category) trên [bãi biển](location)
+    - [glamping](category) ở [Đà Lạt](destination)
+    - [khách sạn](category) [sang trọng](price_range) nhất
+    - [resort](category) [all-inclusive](amenities)
+    - nơi ở có [view núi](amenities)
+    - [khách sạn](category) [thân thiện môi trường](amenities)
+    - [căn hộ dịch vụ](category) cho [gia đình](traveler_type)
+    - [khách sạn](category) có [phòng gym](amenities)
+    - chỗ ở gần [chợ đêm](location)
+    - [hotel](category) có [ban công](amenities) riêng
+    - [resort](category) [riêng tư](amenities)
+    - [motel](category) [giá sinh viên](price_range)
+    - [khách sạn](category) cho [couple](traveler_type)
+    - nơi ở [pet-friendly](amenities)
+    - [khách sạn](category) có [bãi đậu xe](amenities)
+    - [resort](category) có [câu lạc bộ trẻ em](amenities)
+    - [villa](category) có [hồ bơi riêng](amenities)
+    - [khách sạn](category) [view sông](amenities)
+
+- intent: search_restaurant
+  examples: |
+    - tìm [nhà hàng](category) ở [Đà Nẵng](destination)
+    - [quán ăn](category) [hải sản](cuisine_type) tại [Nha Trang](destination)
+    - ăn gì ở [Hội An](destination)
+    - [món Việt](cuisine_type) ngon ở [Hà Nội](destination)
+    - [nhà hàng giá rẻ](price_range) ở [Sài Gòn](destination)
+    - muốn ăn [buffet](cuisine_type) ở [Phú Quốc](destination)
+    - [quán ăn cao cấp](price_range) [món Âu](cuisine_type)
+    - đặc sản [Đà Lạt](destination)
+    - [quán phở](cuisine_type) ngon ở [Hà Nội](destination)
+    - [nhà hàng](category) [món Nhật](cuisine_type)
+    - [quán bún chả](cuisine_type) nổi tiếng
+    - [món ăn đường phố](cuisine_type) ở [Sài Gòn](destination)
+    - [quán cà phê](category) view đẹp
+    - [bánh mì](cuisine_type) ngon nhất
+    - [cơm tấm](cuisine_type) ở đâu ngon
+    - [nhà hàng chay](cuisine_type) ở [Huế](destination)
+    - [quán nướng](cuisine_type) ngon ở [Đà Nẵng](destination)
+    - [món Hàn](cuisine_type) ở [Hà Nội](destination)
+    - [dimsum](cuisine_type) ngon
+    - [lẩu](cuisine_type) hải sản
+    - [nhà hàng](category) có [không gian đẹp](amenities)
+    - [quán ăn](category) gần [biển](location)
+    - [món Thái](cuisine_type) chuẩn vị
+    - [bánh xèo](cuisine_type) [miền Tây](region)
+    - [bún bò Huế](cuisine_type) chính gốc
+    - [cao lầu](cuisine_type) ở [Hội An](destination)
+    - [mì Quảng](cuisine_type) ngon
+    - [chè](cuisine_type) ngon ở đâu
+    - [kem](cuisine_type) thủ công
+    - [nhà hàng](category) [trên cao](location)
+    - [quán ăn](category) [bình dân](price_range) ngon
+    - [food court](category) ở [trung tâm](location)
+    - [nhà hàng](category) có [nhạc sống](amenities)
+    - [quán ăn](category) [mở cửa 24/7](amenities)
+    - [món nướng BBQ](cuisine_type)
+    - [hotpot](cuisine_type) Đài Loan
+    - [pizza](cuisine_type) ngon ở [Đà Nẵng](destination)
+    - [burger](cuisine_type) homemade
+    - [sushi](cuisine_type) tươi
+    - [tacos](cuisine_type) Mexico
+    - [nhà hàng](category) [gia đình](traveler_type)
+    - [quán ăn vặt](cuisine_type) học sinh
+    - [món ăn fusion](cuisine_type)
+    - [vegan](cuisine_type) restaurant
+    - [quán bia](category) craft beer
+    - [rooftop bar](category) view đẹp
+    - [trà sữa](cuisine_type) ngon
+
+- intent: search_activity
+  examples: |
+    - có hoạt động gì ở [Đà Nẵng](destination)
+    - [vui chơi](activity_type) gì ở [Nha Trang](destination)
+    - [tham quan](activity_type) ở [Hội An](destination)
+    - [thể thao mạo hiểm](activity_type) ở [Đà Lạt](destination)
+    - [lặn biển](activity_type) ở [Phú Quốc](destination)
+    - địa điểm [chụp ảnh](activity_type) đẹp
+    - [trải nghiệm văn hóa](activity_type) tại [Sapa](destination)
+    - [trekking](activity_type) ở [Fansipan](destination)
+    - [chèo thuyền kayak](activity_type) ở [vịnh](location)
+    - [lướt ván](activity_type) ở [Mũi Né](destination)
+    - [dù lượn](activity_type) ở [Đà Nẵng](destination)
+    - [cắm trại](activity_type) qua đêm
+    - [leo núi](activity_type) ở đâu
+    - [đi bộ đường dài](activity_type) ở [rừng](location)
+    - [tour xe máy](activity_type) ở [Hà Giang](destination)
+    - [đi thuyền](activity_type) xuyên [hang động](location)
+    - [tắm suối](activity_type) nước nóng
+    - [câu cá](activity_type) ở [biển](location)
+    - [chơi golf](activity_type) ở [Đà Lạt](destination)
+    - [spa và massage](activity_type)
+    - [yoga](activity_type) trên [bãi biển](location)
+    - [đạp xe](activity_type) xung quanh [phố cổ](location)
+    - [tour ẩm thực](activity_type) đêm
+    - [lớp nấu ăn](activity_type) truyền thống
+    - [chợ đêm](activity_type) ở [Phú Quốc](destination)
+    - [xem múa rối nước](activity_type)
+    - [tham quan làng nghề](activity_type)
+    - [chèo thuyền sup](activity_type)
+    - [snorkeling](activity_type) ở [đảo](location)
+    - [scuba diving](activity_type) có [hướng dẫn viên](amenities)
+    - [zipline](activity_type) xuyên [rừng](location)
+    - [bungee jumping](activity_type)
+    - [rafting](activity_type) trên [sông](location)
+    - [canyoning](activity_type) ở [Đà Lạt](destination)
+    - [safari](activity_type) ở [vườn quốc gia](location)
+    - [ngắm bình minh](activity_type) trên [núi](location)
+    - [săn mây](activity_type) ở [Tà Xùa](destination)
+    - [ngắm hoàng hôn](activity_type) trên [biển](location)
+    - [đi xe jeep](activity_type) ở [cồn cát](location)
+    - [bay dù lượn](activity_type) từ [đồi](location)
+    - [chơi jet ski](activity_type)
+    - [lướt ván buồm](activity_type)
+    - [parasailing](activity_type) ở [Nha Trang](destination)
+    - [tàu ngầm](activity_type) ngắm [san hô](location)
+    - [thăm bảo tàng](activity_type)
+    - [xem múa lửa](activity_type) trên [bãi biển](location)
+    - [show ca nhạc](activity_type) về đêm
+    - [câu lạc bộ đêm](activity_type) ở [Sài Gòn](destination)
+    - [massage chân](activity_type)
+    - [trị liệu cá](activity_type)
+
+- intent: search_tour
+  examples: |
+    - tìm [tour](category) đi [Hạ Long](destination)
+    - [tour 3 ngày](duration) ở [Đà Nẵng](destination)
+    - có [tour](category) nào đi [miền Tây](region)
+    - [gói du lịch](category) [Nha Trang](destination)
+    - [tour giá rẻ](price_range) đi [Phú Quốc](destination)
+    - lịch trình du lịch [Sapa](destination) [2 ngày](duration)
+    - [tour](category) [trọn gói](amenities) đi [Đà Lạt](destination)
+    - [tour 1 ngày](duration) ở [Hội An](destination)
+    - [tour](category) [miền Bắc](region) [5 ngày 4 đêm](duration)
+    - [combo du lịch](category) [Phú Quốc](destination) [4 ngày](duration)
+    - [tour](category) [săn mây](activity_type) ở [Tà Xùa](destination)
+    - [tour](category) [khám phá hang động](activity_type)
+    - [tour](category) [leo Fansipan](activity_type)
+    - [tour](category) [thác Bản Giốc](destination)
+    - [tour riêng](tour_type) cho [gia đình](traveler_type)
+    - [tour ghép đoàn](tour_type) đi [Hạ Long](destination)
+    - [tour xe limousine](transport_type) đi [Vũng Tàu](destination)
+    - [tour du thuyền](transport_type) [qua đêm](duration)
+    - [tour ẩm thực](activity_type) ở [Sài Gòn](destination)
+    - [tour chụp ảnh cưới](activity_type) ở [Đà Lạt](destination)
+    - [tour team building](activity_type) ở [resort](location)
+    - [tour phượt](tour_type) [Hà Giang](destination)
+    - [tour xe máy](transport_type) [vòng Việt](region)
+    - [tour khởi hành hàng ngày](departure) đi [Hội An](destination)
+    - [tour cuối tuần](duration) gần [Hà Nội](destination)
+    - [tour](category) [giá tốt](price_range) cho [sinh viên](traveler_type)
+    - [tour all-in](amenities) bao gồm [vé máy bay](transport_type)
+    - [tour](category) không [mua sắm](activity_type)
+    - [tour cao cấp](price_range) [dịch vụ 5 sao](amenities)
+    - [tour eco](tour_type) thân thiện môi trường
+    - [tour khám phá](tour_type) [làng nghề](destination)
+    - [tour](category) [đi bộ](activity_type) xuyên [rừng](location)
+    - [tour](category) [leo thác](activity_type)
+    - [tour](category) [nghỉ dưỡng](activity_type) ở [resort](location)
+    - [tour](category) [lặn ngắm san hô](activity_type)
+    - [tour thiền](activity_type) ở [chùa](location)
+    - [tour trải nghiệm](tour_type) [sống cùng dân bản](activity_type)
+    - [tour](category) [ruộng bậc thang](destination) vào [mùa nước đổ](season)
+    - [tour](category) [hoa](destination) ở [Đà Lạt](destination)
+    - [tour ngắm lá phong](season) ở [Tam Đảo](destination)
+    - [tour](category) [festival](activity_type) ở [Huế](destination)
+    - [tour tết](season) đi [miền Tây](region)
+    - [tour hè](season) cho [trẻ em](traveler_type)
+
+- intent: ask_weather
+  examples: |
+    - thời tiết ở [Đà Nẵng](destination)
+    - [tháng 5](month) đi [Nha Trang](destination) có đẹp không
+    - nên đi [Sapa](destination) [tháng mấy](month)
+    - mùa nào đẹp nhất ở [Phú Quốc](destination)
+    - thời tiết [Hội An](destination) [tháng 3](month)
+    - [tháng 12](month) đi [Đà Lạt](destination) thế nào
+    - [mùa mưa](season) ở [Đà Nẵng](destination) là khi nào
+    - [mùa khô](season) ở [Phú Quốc](destination)
+    - [tháng 9](month) đi [Hà Giang](destination) có lạnh không
+    - thời tiết hiện tại ở [Sapa](destination)
+    - [tháng 2](month) ở [Hà Nội](destination) thế nào
+    - [mùa hoa](season) ở [Đà Lạt](destination)
+    - khi nào có [tuyết](weather) ở [Sapa](destination)
+    - [mùa hè](season) ở [Nha Trang](destination) có nắng nhiều không
+    - nhiệt độ [Đà Nẵng](destination) [tháng 8](month)
+    - có [mưa](weather) nhiều không ở [Hội An](destination)
+    - [tháng nào](month) ít [mưa bão](weather) nhất
+    - thời điểm đẹp nhất đi [Phú Quốc](destination)
+    - [mùa ruộng bậc thang](season) ở [Sapa](destination)
+    - [tháng 10](month) đi biển có được không
+    - [tháng 4](month) ở [Huế](destination) có nắng nóng không
+    - khí hậu [miền Trung](region) [mùa đông](season)
+    - [cuối năm](season) đi [Đà Lạt](destination) có lạnh không
+    - [đầu năm](season) đi đâu đẹp
+    - thời tiết [Việt Nam](region) [mùa hè](season)
+    - [mùa thu](season) ở [Hà Nội](destination) thế nào
+    - khi nào đi [Mũi Né](destination) đẹp nhất
+    - có [bão](weather) ở [Nha Trang](destination) [tháng 11](month) không
+    - [nắng gắt](weather) nhất là tháng mấy
+    - [mùa lũ](season) ở [miền Trung](region)
+
+- intent: ask_transportation
+  examples: |
+    - đi từ [Hà Nội](from_location) đến [Đà Nẵng](to_location)
+    - [xe khách](transport_type) từ [Sài Gòn](from_location) đến [Nha Trang](to_location)
+    - có [máy bay](transport_type) từ [Hà Nội](from_location) đến [Phú Quốc](to_location) không
+    - giá vé từ [Đà Nẵng](from_location) đến [Hội An](to_location)
+    - di chuyển từ [Hà Nội](from_location) đến [Sapa](to_location) bằng gì
+    - [tàu hỏa](transport_type) từ [Sài Gòn](from_location) đến [Đà Nẵng](to_location)
+    - mất bao lâu từ [Hà Nội](from_location) đến [Hạ Long](to_location)
+    - [xe limousine](transport_type) đi [Vũng Tàu](to_location)
+    - [taxi](transport_type) từ [sân bay](from_location) về [trung tâm](to_location)
+    - thuê [xe máy](transport_type) ở [Đà Lạt](destination)
+    - [xe buýt](transport_type) đi [Hội An](to_location) từ [Đà Nẵng](from_location)
+    - [grab](transport_type) ở [Sài Gòn](destination) giá bao nhiêu
+    - có [phà](transport_type) đi [đảo](to_location) không
+    - [tàu cao tốc](transport_type) đi [Phú Quốc](to_location)
+    - [xe ôm](transport_type) giá thế nào
+    - thuê [xe ô tô](transport_type) tự lái
+    - di chuyển nội thành ở [Đà Nẵng](destination)
+    - đi [sân bay](to_location) bằng gì
+    - có [xe đưa đón](transport_type) từ [khách sạn](from_location) không
+    - [shuttle bus](transport_type) từ [sân bay](from_location)
+    - [xe buýt 2 tầng](transport_type) tham quan
+    - thuê [xe đạp](transport_type) ở [Hội An](destination)
+    - [xe điện](transport_type) tham quan
+    - cách rẻ nhất đi từ [A](from_location) đến [B](to_location)
+    - cách nhanh nhất từ [Hà Nội](from_location) đến [Sapa](to_location)
+    - [xe giường nằm](transport_type) chất lượng
+    - [xe limousine giường nằm](transport_type) đi [Đà Lạt](to_location)
+    - [bay thẳng](transport_type) hay [transit](transport_type)
+    - giờ [máy bay](transport_type) từ [Hà Nội](from_location)
+    - lịch [tàu](transport_type) đi [Sapa](to_location)
+    - [xe khách](transport_type) chạy suốt đêm
+
+- intent: get_reviews
+  examples: |
+    - review về [khách sạn X](hotel_name)
+    - đánh giá về [Đà Nẵng](destination)
+    - mọi người nói gì về [Hội An](destination)
+    - [nhà hàng Y](restaurant_name) có ngon không
+    - có ai đi [Phú Quốc](destination) chưa
+    - [tour Z](tour_name) có tốt không
+    - [resort ABC](hotel_name) thế nào
+    - trải nghiệm ở [Sapa](destination)
+    - [Đà Lạt](destination) có đáng đi không
+    - ai đã từng đi [Hạ Long](destination)
+    - [Nha Trang](destination) đẹp như người ta nói không
+    - [khách sạn](category) ở [Hội An](destination) có tốt không
+    - du khách nói gì về [Phú Quốc](destination)
+    - [nhà hàng hải sản](cuisine_type) ở [Nha Trang](destination) ngon không
+    - ai đã [lặn biển](activity_type) ở [Phú Quốc](destination)
+    - [tour Hạ Long](destination) đáng tiền không
+    - [resort](category) ở [Đà Nẵng](destination) có sang không
+    - có nên đi [Mũi Né](destination) không
+    - [Vũng Tàu](destination) đông người không
+    - [Sapa](destination) đẹp không bạn
+    - review [homestay](category) ở [Hà Giang](destination)
+    - kinh nghiệm đi [Tà Xùa](destination)
+    - [Ninh Bình](destination) có gì hay
+    - đánh giá [tour trekking](activity_type) ở [Fansipan](destination)
+
+- intent: ask_budget_recommendation
+  examples: |
+    - du lịch [Đà Nẵng](destination) hết bao nhiêu
+    - [ngân sách](category) cho chuyến đi [Nha Trang](destination)
+    - đi [Phú Quốc](destination) [3 ngày](duration) cần bao nhiêu tiền
+    - chi phí du lịch [Hà Nội](destination)
+    - [2 triệu](budget) đi được đâu
+    - tốn bao nhiêu cho [4 người](traveler_count) đi [Đà Lạt](destination)
+    - [5 triệu](budget) đi du lịch được không
+    - đi [Sapa](destination) [2 ngày](duration) tầm bao nhiêu
+    - chi phí [ăn ở](category) ở [Hội An](destination)
+    - [1 tuần](duration) ở [Phú Quốc](destination) hết bao nhiêu
+    - [budget](category) [10 triệu](budget) đi đâu được
+    - cần chuẩn bị bao nhiêu tiền cho [Nha Trang](destination)
+    - du lịch [tiết kiệm](budget_type) ở [Đà Nẵng](destination)
+    - đi [Hạ Long](destination) [giá rẻ](budget_type)
+    - chi phí trung bình [1 ngày](duration) ở [Sài Gòn](destination)
+    - [gia đình 4 người](traveler_count) đi [Vũng Tàu](destination) tốn bao nhiêu
+    - [backpacker](traveler_type) đi [miền Bắc](region) hết bao nhiêu
+    - du lịch [cao cấp](budget_type) ở [Đà Lạt](destination)
+    - [3 triệu](budget) cho [2 người](traveler_count) đi [Mũi Né](destination)
+    - chi phí [tour](category) đi [Hạ Long](destination)
+    - giá [khách sạn](category) ở [Nha Trang](destination) bao nhiêu
+    - [vé máy bay](category) đi [Phú Quốc](destination) giá bao nhiêu
+    - tổng chi phí [5 ngày](duration) ở [Đà Nẵng](destination)
+    - có thể đi [Sapa](destination) với [1 triệu](budget) không
+
+- intent: ask_best_time
+  examples: |
+    - khi nào nên đi [Đà Nẵng](destination)
+    - thời điểm đẹp nhất đi [Sapa](destination)
+    - [tháng mấy](month) đi [Phú Quốc](destination) đẹp
+    - nên đi [Hạ Long](destination) vào mùa nào
+    - [mùa nào](season) đi [Đà Lạt](destination) lý tưởng
+    - thời gian thích hợp đi [Nha Trang](destination)
+    - mùa du lịch ở [Hội An](destination)
+    - đi [Mũi Né](destination) tránh mùa nào
+    - [tháng 4](month) có phù hợp đi [Vũng Tàu](destination) không
+    - [cuối năm](season) đi đâu đẹp
+    - [tết](season) nên đi [miền Bắc](region) hay [miền Nam](region)
+    - [hè](season) này đi [biển](category) nào
+    - [mùa hoa](season) ở [Đà Lạt](destination) là khi nào
+    - khi nào có [tuyết](weather) ở [Sapa](destination)
+    - [ruộng bậc thang](category) đẹp nhất tháng mấy
+    - [mùa lúa chín](season) ở [Mù Cang Chải](destination)
+    - thời điểm [ít khách](crowd) nhất
+
+- intent: ask_travel_tips
+  examples: |
+    - kinh nghiệm đi [Đà Nẵng](destination)
+    - cần chuẩn bị gì khi đi [Sapa](destination)
+    - lưu ý gì khi đi [Hà Giang](destination)
+    - tips du lịch [Phú Quốc](destination)
+    - cần mang gì đi [Đà Lạt](destination)
+    - có nên [đặt tour](category) trước không
+    - [visa](document) Việt Nam thế nào
+    - [tiền](currency) nên đổi ở đâu
+    - có nên mua [bảo hiểm du lịch](insurance) không
+    - [sim](telecom) điện thoại mua ở đâu
+    - [ăn uống](category) ở [đâu](location) ngon và rẻ
+    - cẩn thận điều gì ở [Nha Trang](destination)
+    - [an toàn](safety) khi đi du lịch một mình
+    - [giá cả](price) ở [Đà Nẵng](destination) thế nào
+    - người dân [thân thiện](culture) không
+    - có nên thuê [hướng dẫn viên](service) không
+    - [giao tiếp](language) bằng tiếng Anh được không
+    - nên ở [khu nào](location) ở [Hà Nội](destination)
+    - [đi lại](transportation) ở [Sài Gòn](destination) thế nào
+    - tránh [bẫy du lịch](scam) ở [Hội An](destination)
+
+- intent: compare_destinations
+  examples: |
+    - so sánh [Đà Nẵng](destination) và [Nha Trang](destination)
+    - [Phú Quốc](destination) hay [Côn Đảo](destination) đẹp hơn
+    - nên chọn [Sapa](destination) hay [Đà Lạt](destination)
+    - khác nhau giữa [Hạ Long](destination) và [Ninh Bình](destination)
+    - [Hội An](destination) và [Huế](destination) cái nào hay hơn
+    - [Mũi Né](destination) so với [Vũng Tàu](destination)
+    - [Hà Nội](destination) hay [Sài Gòn](destination) thú vị hơn
+    - [biển miền Trung](region) hay [biển miền Nam](region)
+    - [Tam Đảo](destination) với [Ba Vì](destination) nơi nào đẹp hơn
+    - [Tà Xùa](destination) hay [Mộc Châu](destination) để [săn mây](activity_type)
+
+- intent: ask_travel_documents
+  examples: |
+    - cần giấy tờ gì đi [Phú Quốc](destination)
+    - [CMND](document) có đủ để đi du lịch không
+    - trẻ em cần giấy tờ gì
+    - [hộ chiếu](document) còn hạn bao lâu
+    - đi [nước ngoài](region) cần gì
+    - [visa](document) du lịch Việt Nam
+    - [giấy phép lái xe](document) quốc tế
+    - cần [xét nghiệm](health) gì không
+    - [bảo hiểm](insurance) du lịch bắt buộc không
+
+- intent: ask_special_requirements
+  examples: |
+    - [khách sạn](category) cho người [khuyết tật](special_need)
+    - du lịch với [người già](traveler_type)
+    - đi du lịch cùng [em bé](traveler_type)
+    - [chỗ ăn chay](cuisine_type) ở [Đà Nẵng](destination)
+    - [halal food](cuisine_type) ở đâu
+    - [khách sạn](category) cho [người ăn chay](diet)
+    - địa điểm thân thiện với [trẻ em](traveler_type)
+    - du lịch một mình [nữ](gender)
+    - [tour](category) cho [người cao tuổi](traveler_type)
+    - [resort](category) có [câu lạc bộ trẻ em](amenities)
+
+- intent: ask_packing_list
+  examples: |
+    - nên mang gì đi [biển](category)
+    - cần chuẩn bị gì đi [Sapa](destination) mùa đông
+    - [quần áo](item) gì cho [Đà Lạt](destination)
+    - đồ dùng cần thiết đi du lịch
+    - cần mang [thuốc](item) gì
+    - [kem chống nắng](item) loại nào tốt
+    - có cần mang [áo mưa](item) không
+    - [giày](item) gì phù hợp để [trekking](activity_type)
+    - nên đóng gói thế nào cho [tour 5 ngày](duration)
+
+- intent: ask_local_culture
+  examples: |
+    - văn hóa ở [Huế](destination) thế nào
+    - phong tục tập quán [người Việt](culture)
+    - lễ hội ở [Đà Nẵng](destination)
+    - [ăn mặc](etiquette) khi vào [chùa](location)
+    - có nên cho [tiền tip](etiquette) không
+    - [món quà](souvenir) đặc trưng [Hội An](destination)
+    - [làng nghề](category) nổi tiếng
+    - đặc sản mua về làm quà
+    - [lễ hội](event) tháng này có gì
+    - [chợ](category) nào đáng đi
+
+- intent: ask_photography_spots
+  examples: |
+    - địa điểm [chụp ảnh](activity_type) đẹp ở [Đà Lạt](destination)
+    - [check-in](activity_type) ở đâu ở [Nha Trang](destination)
+    - [view đẹp](category) để chụp ảnh
+    - [bãi biển](category) view đẹp nhất
+    - [cầu vàng](destination) ở [Đà Nẵng](destination)
+    - [instagrammable spots](category) ở [Hội An](destination)
+    - [quán cà phê](category) decor đẹp
+    - [tháp chuông](destination) Tam Đảo
+    - nơi [chụp ảnh cưới](activity_type) đẹp
+
+- intent: ask_nightlife
+  examples: |
+    - [vui chơi về đêm](activity_type) ở [Đà Nẵng](destination)
+    - [bar](category) nào hay ở [Nha Trang](destination)
+    - [club](category) ở [Sài Gòn](destination)
+    - [chợ đêm](category) ở [Phú Quốc](destination)
+    - [nhạc sống](activity_type) ở đâu
+    - [rooftop bar](category) ở [Hà Nội](destination)
+    - hoạt động buổi tối ở [Hội An](destination)
+    - [phố đi bộ](category) ở [Đà Lạt](destination)
+    - [show diễn](activity_type) về đêm
+
+- intent: ask_family_activities
+  examples: |
+    - đi [Đà Nẵng](destination) với [trẻ em](traveler_type)
+    - hoạt động cho [gia đình](traveler_type)
+    - [công viên giải trí](category) ở [Nha Trang](destination)
+    - [khu vui chơi trẻ em](category)
+    - [bảo tàng](category) thú vị cho [trẻ](traveler_type)
+    - [sở thú](category) ở [Sài Gòn](destination)
+    - [công viên nước](category)
+    - địa điểm [an toàn cho trẻ](safety)
+
+- intent: ask_adventure_activities
+  examples: |
+    - [hoạt động mạo hiểm](activity_type) ở [Đà Lạt](destination)
+    - [thể thao khắc nghiệt](activity_type)
+    - [leo núi](activity_type) ở đâu
+    - [nhảy dù](activity_type) ở [Nha Trang](destination)
+    - [lướt sóng](activity_type) ở [Mũi Né](destination)
+    - [cắm trại](activity_type) hoang dã
+    - [khám phá hang động](activity_type)
+    - [chèo thuyền](activity_type) xuyên [rừng ngập mặn](location)
+
+- intent: ask_romantic_spots
+  examples: |
+    - địa điểm lãng mạn cho [couple](traveler_type)
+    - [honeymoon](purpose) nên đi đâu
+    - [resort](category) cho [cặp đôi](traveler_type)
+    - [nhà hàng](category) [view biển](amenities) lãng mạn
+    - [sunset](activity_type) đẹp nhất ở đâu
+    - hoạt động cho [2 người](traveler_count)
+    - [villa](category) riêng tư
+    - nơi [cầu hôn](purpose) đẹp
+
+- intent: ask_food_tour
+  examples: |
+    - [tour ẩm thực](activity_type) ở [Hà Nội](destination)
+    - [street food](cuisine_type) nổi tiếng
+    - [chợ](category) ẩm thực ở [Sài Gòn](destination)
+    - món ăn phải thử ở [Huế](destination)
+    - [đặc sản](cuisine_type) [Đà Nẵng](destination)
+    - [quán ăn ngon](category) địa phương hay đi
+    - [ẩm thực đường phố](cuisine_type)
+    - [cooking class](activity_type) ở [Hội An](destination)
+
+- intent: bot_challenge
+  examples: |
+    - bạn là ai
+    - bạn là bot à
+    - bạn là người hay máy
+    - tên bạn là gì
+    - bạn có thể giúp gì
+    - bạn làm được gì
+    - chatbot à
+    - AI à
+
+- intent: out_of_scope
+  examples: |
+    - thời tiết hôm nay thế nào
+    - bóng đá
+    - nấu ăn
+    - học tiếng Anh
+    - giá vàng
+    - chứng khoán
+    - sức khỏe
+    - làm đẹp
+    - mua sắm online
+    - game

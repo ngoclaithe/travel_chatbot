@@ -1,0 +1,63 @@
+version: "3.1"
+
+stories:
+- story: greet and search destination
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: search_destination
+  - action: action_search_destination
+
+- story: search hotel with destination
+  steps:
+  - intent: search_hotel
+  - action: action_search_hotel
+
+- story: search restaurant
+  steps:
+  - intent: search_restaurant
+  - action: action_search_restaurant
+
+- story: search activities
+  steps:
+  - intent: search_activity
+  - action: action_search_activity
+
+- story: search tour packages
+  steps:
+  - intent: search_tour
+  - action: action_search_tour
+
+- story: ask weather information
+  steps:
+  - intent: ask_weather
+  - action: action_get_weather
+
+- story: ask transportation
+  steps:
+  - intent: ask_transportation
+  - action: action_get_transportation
+
+- story: get reviews
+  steps:
+  - intent: get_reviews
+  - action: action_get_reviews
+
+- story: budget recommendation
+  steps:
+  - intent: ask_budget_recommendation
+  - action: action_recommend_budget
+
+- story: complete conversation
+  steps:
+  - intent: search_destination
+  - action: action_search_destination
+  - intent: search_hotel
+  - action: action_search_hotel
+  - intent: affirm
+  - action: utter_goodbye
+
+- story: goodbye
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye

@@ -1,0 +1,127 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - search_destination
+  - search_hotel
+  - search_restaurant
+  - search_activity
+  - search_tour
+  - ask_weather
+  - ask_transportation
+  - get_reviews
+  - ask_budget_recommendation
+
+entities:
+  - destination
+  - province
+  - region
+  - category
+  - hotel_name
+  - star_rating
+  - price_range
+  - cuisine_type
+  - activity_type
+  - duration
+  - month
+  - from_location
+  - to_location
+  - transport_type
+
+slots:
+  destination:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: destination
+  
+  province:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: province
+  
+  region:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: region
+  
+  category:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: category
+  
+  price_range:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: price_range
+  
+  star_rating:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: star_rating
+  
+  cuisine_type:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: cuisine_type
+  
+  activity_type:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: activity_type
+  
+  month:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: month
+  
+  from_location:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: from_location
+  
+  to_location:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: to_location
+
+responses:
+  utter_greet:
+    - text: "Xin chào! Tôi là trợ lý du lịch. Tôi có thể giúp bạn tìm điểm đến, khách sạn, nhà hàng hay lên kế hoạch cho chuyến đi. Bạn cần gì?"
+  
+  utter_goodbye:
+    - text: "Chúc bạn có chuyến đi vui vẻ! Hẹn gặp lại!"
+  
+  utter_ask_clarification:
+    - text: "Bạn có thể nói rõ hơn được không?"
+  
+  utter_default:
+    - text: "Xin lỗi, tôi chưa hiểu câu hỏi của bạn. Bạn có thể hỏi về điểm đến, khách sạn, nhà hàng, hoạt động hay tour du lịch."
+
+actions:
+  - action_search_destination
+  - action_search_hotel
+  - action_search_restaurant
+  - action_search_activity
+  - action_search_tour
+  - action_get_weather
+  - action_get_transportation
+  - action_get_reviews
+  - action_recommend_budget
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
