@@ -1,63 +1,657 @@
 version: "3.1"
 
 stories:
-- story: greet and search destination
+
+- story: happy path - search destination and book
   steps:
   - intent: greet
   - action: utter_greet
   - intent: search_destination
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_search_destination
+  - intent: affirm
+  - intent: search_hotel
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_search_hotel
+  - intent: thank
+  - action: utter_you_are_welcome
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: search destination by category
+  steps:
+  - intent: search_destination
+    entities:
+    - category: "biển"
+  - action: action_search_destination
+  - intent: search_destination
+    entities:
+    - category: "núi"
   - action: action_search_destination
 
-- story: search hotel with destination
+- story: search destination by region
+  steps:
+  - intent: search_destination
+    entities:
+    - region: "miền Trung"
+  - action: action_search_destination
+
+- story: detailed hotel search
   steps:
   - intent: search_hotel
+    entities:
+    - destination: "Đà Nẵng"
+    - star_rating: "5 sao"
+  - action: action_search_hotel
+  - intent: search_hotel
+    entities:
+    - destination: "Đà Nẵng"
+    - price_range: "giá rẻ"
   - action: action_search_hotel
 
-- story: search restaurant
+- story: restaurant exploration
   steps:
   - intent: search_restaurant
+    entities:
+    - destination: "Hội An"
+  - action: action_search_restaurant
+  - intent: search_restaurant
+    entities:
+    - destination: "Hội An"
+    - cuisine_type: "hải sản"
   - action: action_search_restaurant
 
-- story: search activities
+- story: activity planning
   steps:
   - intent: search_activity
+    entities:
+    - destination: "Nha Trang"
+  - action: action_search_activity
+  - intent: search_activity
+    entities:
+    - destination: "Nha Trang"
+    - activity_type: "lặn biển"
   - action: action_search_activity
 
-- story: search tour packages
+- story: tour package inquiry
   steps:
   - intent: search_tour
+    entities:
+    - destination: "Hạ Long"
+  - action: action_search_tour
+  - intent: search_tour
+    entities:
+    - destination: "Hạ Long"
+    - duration: "2 ngày"
   - action: action_search_tour
 
-- story: ask weather information
+- story: weather check before booking
   steps:
   - intent: ask_weather
+    entities:
+    - destination: "Sapa"
+    - month: "tháng 12"
   - action: action_get_weather
+  - intent: affirm
+  - intent: search_hotel
+    entities:
+    - destination: "Sapa"
+  - action: action_search_hotel
 
-- story: ask transportation
+- story: transportation planning
   steps:
   - intent: ask_transportation
+    entities:
+    - from_location: "Hà Nội"
+    - to_location: "Đà Nẵng"
   - action: action_get_transportation
+  - intent: search_hotel
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_search_hotel
 
-- story: get reviews
-  steps:
-  - intent: get_reviews
-  - action: action_get_reviews
-
-- story: budget recommendation
+- story: budget calculation
   steps:
   - intent: ask_budget_recommendation
+    entities:
+    - destination: "Phú Quốc"
+    - duration: "3 ngày"
   - action: action_recommend_budget
+  - intent: affirm
+  - intent: search_tour
+    entities:
+    - destination: "Phú Quốc"
+  - action: action_search_tour
 
-- story: complete conversation
+- story: review checking
   steps:
+  - intent: search_destination
+    entities:
+    - destination: "Đà Lạt"
+  - action: action_search_destination
+  - intent: get_reviews
+    entities:
+    - destination: "Đà Lạt"
+  - action: action_get_reviews
+  - intent: affirm
+  - intent: search_hotel
+    entities:
+    - destination: "Đà Lạt"
+  - action: action_search_hotel
+
+- story: complete trip planning
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: search_destination
+    entities:
+    - region: "miền Trung"
+  - action: action_search_destination
+  - intent: ask_weather
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_get_weather
+  - intent: ask_budget_recommendation
+    entities:
+    - destination: "Đà Nẵng"
+    - duration: "4 ngày"
+  - action: action_recommend_budget
+  - intent: search_hotel
+    entities:
+    - destination: "Đà Nẵng"
+    - price_range: "trung bình"
+  - action: action_search_hotel
+  - intent: search_restaurant
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_search_restaurant
+  - intent: search_activity
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_search_activity
+  - intent: thank
+  - action: utter_you_are_welcome
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: compare then decide
+  steps:
+  - intent: compare_destinations
+    entities:
+    - destination: "Nha Trang"
+    - destination: "Phú Quốc"
+  - action: action_compare_destinations
+  - intent: ask_weather
+    entities:
+    - destination: "Nha Trang"
+  - action: action_get_weather
+  - intent: ask_budget_recommendation
+    entities:
+    - destination: "Nha Trang"
+  - action: action_recommend_budget
+  - intent: search_tour
+    entities:
+    - destination: "Nha Trang"
+  - action: action_search_tour
+
+- story: seasonal planning
+  steps:
+  - intent: ask_best_time
+    entities:
+    - destination: "Sapa"
+  - action: action_get_best_time
+  - intent: ask_weather
+    entities:
+    - destination: "Sapa"
+    - month: "tháng 9"
+  - action: action_get_weather
+  - intent: search_tour
+    entities:
+    - destination: "Sapa"
+  - action: action_search_tour
+
+- story: family trip planning
+  steps:
+  - intent: ask_family_activities
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_get_family_activities
+  - intent: search_hotel
+    entities:
+    - destination: "Đà Nẵng"
+    - traveler_type: "gia đình"
+  - action: action_search_hotel
+  - intent: search_restaurant
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_search_restaurant
+
+- story: adventure seeker
+  steps:
+  - intent: ask_adventure_activities
+    entities:
+    - destination: "Đà Lạt"
+  - action: action_get_adventure_activities
+  - intent: search_activity
+    entities:
+    - destination: "Đà Lạt"
+    - activity_type: "thể thao mạo hiểm"
+  - action: action_search_activity
+  - intent: search_tour
+    entities:
+    - destination: "Đà Lạt"
+  - action: action_search_tour
+
+- story: romantic getaway
+  steps:
+  - intent: ask_romantic_spots
+  - action: action_get_romantic_spots
+  - intent: search_hotel
+    entities:
+    - traveler_type: "couple"
+    - amenities: "view đẹp"
+  - action: action_search_hotel
+  - intent: search_restaurant
+    entities:
+    - amenities: "lãng mạn"
+  - action: action_search_restaurant
+
+- story: food lover journey
+  steps:
+  - intent: ask_food_tour
+    entities:
+    - destination: "Hà Nội"
+  - action: action_get_food_tour
+  - intent: search_restaurant
+    entities:
+    - destination: "Hà Nội"
+    - cuisine_type: "đường phố"
+  - action: action_search_restaurant
+  - intent: search_activity
+    entities:
+    - destination: "Hà Nội"
+    - activity_type: "tour ẩm thực"
+  - action: action_search_activity
+
+- story: photography trip
+  steps:
+  - intent: ask_photography_spots
+    entities:
+    - destination: "Hội An"
+  - action: action_get_photography_spots
+  - intent: search_destination
+    entities:
+    - destination: "Hội An"
+  - action: action_search_destination
+  - intent: ask_best_time
+    entities:
+    - destination: "Hội An"
+  - action: action_get_best_time
+
+- story: backpacker budget trip
+  steps:
+  - intent: ask_budget_recommendation
+    entities:
+    - budget: "2 triệu"
+    - traveler_type: "backpacker"
+  - action: action_recommend_budget
   - intent: search_destination
   - action: action_search_destination
   - intent: search_hotel
+    entities:
+    - category: "hostel"
+    - price_range: "rẻ"
+  - action: action_search_hotel
+  - intent: ask_transportation
+  - action: action_get_transportation
+
+- story: last minute booking
+  steps:
+  - intent: search_tour
+    entities:
+    - departure: "hôm nay"
+  - action: action_search_tour
+  - intent: deny
+  - intent: search_tour
+    entities:
+    - departure: "cuối tuần"
+  - action: action_search_tour
+  - intent: affirm
+  - action: utter_booking_confirmed
+
+- story: change of plans
+  steps:
+  - intent: search_destination
+    entities:
+    - destination: "Nha Trang"
+  - action: action_search_destination
+  - intent: deny
+  - intent: search_destination
+    entities:
+    - destination: "Phú Quốc"
+  - action: action_search_destination
+  - intent: affirm
+  - intent: search_hotel
+    entities:
+    - destination: "Phú Quốc"
+  - action: action_search_hotel
+
+- story: weather cancellation
+  steps:
+  - intent: ask_weather
+    entities:
+    - destination: "Đà Nẵng"
+    - month: "tháng 10"
+  - action: action_get_weather
+  - intent: deny
+  - intent: ask_best_time
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_get_best_time
+  - intent: search_tour
+  - action: action_search_tour
+
+- story: special requirements trip
+  steps:
+  - intent: ask_special_requirements
+    entities:
+    - special_need: "khuyết tật"
+  - action: action_get_special_requirements
+  - intent: search_hotel
+    entities:
+    - amenities: "phù hợp khuyết tật"
+  - action: action_search_hotel
+  - intent: search_activity
+  - action: action_search_activity
+
+- story: cultural exploration
+  steps:
+  - intent: ask_local_culture
+    entities:
+    - destination: "Huế"
+  - action: action_get_local_culture
+  - intent: search_activity
+    entities:
+    - destination: "Huế"
+    - activity_type: "văn hóa"
+  - action: action_search_activity
+  - intent: search_restaurant
+    entities:
+    - destination: "Huế"
+    - cuisine_type: "món Huế"
+  - action: action_search_restaurant
+
+- story: nightlife exploration
+  steps:
+  - intent: ask_nightlife
+    entities:
+    - destination: "Sài Gòn"
+  - action: action_get_nightlife
+  - intent: search_activity
+    entities:
+    - destination: "Sài Gòn"
+    - activity_type: "vui chơi về đêm"
+  - action: action_search_activity
+  - intent: search_restaurant
+    entities:
+    - category: "bar"
+  - action: action_search_restaurant
+
+- story: multi-city trip
+  steps:
+  - intent: search_destination
+    entities:
+    - region: "miền Trung"
+  - action: action_search_destination
+  - intent: ask_transportation
+    entities:
+    - from_location: "Đà Nẵng"
+    - to_location: "Hội An"
+  - action: action_get_transportation
+  - intent: ask_transportation
+    entities:
+    - from_location: "Hội An"
+    - to_location: "Huế"
+  - action: action_get_transportation
+  - intent: search_tour
+    entities:
+    - duration: "5 ngày"
+  - action: action_search_tour
+
+- story: solo female traveler
+  steps:
+  - intent: ask_travel_tips
+    entities:
+    - traveler_type: "nữ một mình"
+  - action: action_get_travel_tips
+  - intent: search_hotel
+    entities:
+    - amenities: "an toàn"
+  - action: action_search_hotel
+  - intent: search_activity
+  - action: action_search_activity
+
+- story: group trip planning
+  steps:
+  - intent: search_tour
+    entities:
+    - traveler_count: "10 người"
+  - action: action_search_tour
+  - intent: search_hotel
+    entities:
+    - traveler_type: "nhóm"
+  - action: action_search_hotel
+  - intent: search_activity
+    entities:
+    - activity_type: "team building"
+  - action: action_search_activity
+
+- story: eco tourism
+  steps:
+  - intent: search_destination
+    entities:
+    - category: "sinh thái"
+  - action: action_search_destination
+  - intent: search_hotel
+    entities:
+    - amenities: "thân thiện môi trường"
+  - action: action_search_hotel
+  - intent: search_tour
+    entities:
+    - tour_type: "eco"
+  - action: action_search_tour
+
+- story: luxury travel
+  steps:
+  - intent: search_hotel
+    entities:
+    - star_rating: "5 sao"
+    - price_range: "cao cấp"
+  - action: action_search_hotel
+  - intent: search_restaurant
+    entities:
+    - price_range: "cao cấp"
+  - action: action_search_restaurant
+  - intent: search_activity
+    entities:
+    - activity_type: "spa"
+  - action: action_search_activity
+  - intent: ask_budget_recommendation
+    entities:
+    - budget_type: "cao cấp"
+  - action: action_recommend_budget
+
+- story: weekend getaway
+  steps:
+  - intent: search_destination
+    entities:
+    - duration: "cuối tuần"
+  - action: action_search_destination
+  - intent: search_tour
+    entities:
+    - duration: "2 ngày"
+  - action: action_search_tour
+  - intent: ask_transportation
+  - action: action_get_transportation
+
+- story: honeymoon planning
+  steps:
+  - intent: ask_romantic_spots
+    entities:
+    - purpose: "honeymoon"
+  - action: action_get_romantic_spots
+  - intent: search_hotel
+    entities:
+    - category: "resort"
+    - amenities: "riêng tư"
+  - action: action_search_hotel
+  - intent: search_activity
+    entities:
+    - traveler_type: "couple"
+  - action: action_search_activity
+  - intent: ask_budget_recommendation
+    entities:
+    - duration: "7 ngày"
+  - action: action_recommend_budget
+
+- story: festival season trip
+  steps:
+  - intent: ask_local_culture
+    entities:
+    - destination: "Huế"
+    - event: "festival"
+  - action: action_get_local_culture
+  - intent: ask_best_time
+    entities:
+    - destination: "Huế"
+  - action: action_get_best_time
+  - intent: search_hotel
+    entities:
+    - destination: "Huế"
+  - action: action_search_hotel
+
+- story: rainy season alternative
+  steps:
+  - intent: ask_weather
+    entities:
+    - destination: "Đà Nẵng"
+    - season: "mùa mưa"
+  - action: action_get_weather
+  - intent: deny
+  - intent: ask_best_time
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_get_best_time
+  - intent: search_destination
+    entities:
+    - category: "biển"
+  - action: action_search_destination
+
+- story: packing help
+  steps:
+  - intent: ask_packing_list
+    entities:
+    - destination: "Sapa"
+    - season: "mùa đông"
+  - action: action_get_packing_list
+  - intent: ask_travel_tips
+    entities:
+    - destination: "Sapa"
+  - action: action_get_travel_tips
+
+- story: visa and documents
+  steps:
+  - intent: ask_travel_documents
+  - action: action_get_travel_documents
+  - intent: ask_travel_tips
+  - action: action_get_travel_tips
+
+- story: bot introduction
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: bot_challenge
+  - action: utter_iamabot
+  - intent: search_destination
+  - action: action_search_destination
+
+- story: out of scope handling
+  steps:
+  - intent: out_of_scope
+  - action: utter_out_of_scope
+  - intent: search_destination
+  - action: action_search_destination
+
+- story: frustrated user
+  steps:
+  - intent: deny
+  - action: utter_ask_clarification
+  - intent: search_destination
+  - action: action_search_destination
+
+- story: repeat request
+  steps:
+  - intent: search_destination
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_search_destination
+  - intent: search_destination
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_search_destination
+
+- story: clarification needed
+  steps:
+  - intent: search_hotel
+  - action: utter_ask_destination
+  - intent: inform
+    entities:
+    - destination: "Nha Trang"
+  - action: action_search_hotel
+
+- story: iterative refinement
+  steps:
+  - intent: search_hotel
+    entities:
+    - destination: "Đà Nẵng"
+  - action: action_search_hotel
+  - intent: deny
+  - action: utter_ask_clarification
+  - intent: search_hotel
+    entities:
+    - destination: "Đà Nẵng"
+    - price_range: "rẻ"
   - action: action_search_hotel
   - intent: affirm
-  - action: utter_goodbye
+  - action: utter_great
 
-- story: goodbye
+- story: mixed intent conversation
   steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: ask_weather
+    entities:
+    - destination: "Phú Quốc"
+  - action: action_get_weather
+  - intent: search_destination
+    entities:
+    - destination: "Phú Quốc"
+  - action: action_search_destination
+  - intent: get_reviews
+    entities:
+    - destination: "Phú Quốc"
+  - action: action_get_reviews
+  - intent: search_hotel
+    entities:
+    - destination: "Phú Quốc"
+  - action: action_search_hotel
+  - intent: ask_transportation
+    entities:
+    - to_location: "Phú Quốc"
+  - action: action_get_transportation
+  - intent: thank
+  - action: utter_you_are_welcome
   - intent: goodbye
   - action: utter_goodbye

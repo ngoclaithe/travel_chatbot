@@ -1,0 +1,582 @@
+version: "3.1"
+
+nlu:
+- lookup: destination
+  examples: |
+    - Đà Nẵng
+    - Hà Nội
+    - Sài Gòn
+    - TP HCM
+    - Phú Quốc
+    - Nha Trang
+    - Hội An
+    - Sapa
+    - Đà Lạt
+    - Hạ Long
+    - Vũng Tàu
+    - Mũi Né
+    - Phan Thiết
+    - Huế
+    - Cần Thơ
+    - Hải Phòng
+    - Quy Nhơn
+    - Bình Định
+    - Ninh Bình
+    - Tam Đảo
+    - Hà Giang
+    - Cao Bằng
+    - Bắc Kạn
+    - Tuyên Quang
+    - Lạng Sơn
+    - Mộc Châu
+    - Sơn La
+    - Điện Biên
+    - Lai Châu
+    - Yên Bái
+    - Tà Xùa
+    - Mù Cang Chải
+    - Fansipan
+    - Cát Bà
+    - Bái Đính
+    - Tràng An
+    - Tam Cốc
+    - Bích Động
+    - Cô Tô
+    - Quan Lạn
+    - Vân Đồn
+    - Móng Cái
+    - Sa Đéc
+    - Châu Đốc
+    - Phú Yên
+    - Tuy Hòa
+    - Đắk Lắk
+    - Buôn Ma Thuột
+    - Gia Lai
+    - Pleiku
+    - Kon Tum
+    - Đắk Nông
+    - Lâm Đồng
+    - Bảo Lộc
+    - Phan Rang
+    - Ninh Thuận
+    - Cam Ranh
+    - Khánh Hòa
+    - Côn Đảo
+    - Bà Rịa
+    - Long Hải
+    - Hồ Tràm
+    - Bình Thuận
+    - Lagi
+    - Vĩnh Long
+    - Trà Vinh
+    - Sóc Trăng
+    - Bạc Liêu
+    - Cà Mau
+    - Kiên Giang
+    - Rạch Giá
+    - Hà Tiên
+    - An Giang
+    - Đồng Tháp
+    - Sa Đéc
+    - Cao Lãnh
+    - Bến Tre
+    - Tiền Giang
+    - Mỹ Tho
+    - Long An
+    - Tây Ninh
+    - Núi Bà Đen
+    - Bình Dương
+    - Bình Phước
+    - Đồng Nai
+    - Biên Hòa
+    - Nam Cát Tiên
+
+- lookup: province
+  examples: |
+    - Hà Nội
+    - TP HCM
+    - Đà Nẵng
+    - Hải Phòng
+    - Cần Thơ
+    - Quảng Ninh
+    - Lào Cai
+    - Lâm Đồng
+    - Khánh Hòa
+    - Bình Thuận
+    - Bà Rịa Vũng Tàu
+    - Kiên Giang
+    - Quảng Nam
+    - Thừa Thiên Huế
+    - Bình Định
+    - Phú Yên
+    - Ninh Thuận
+    - Đắk Lắk
+    - Gia Lai
+    - Kon Tum
+    - Đắk Nông
+    - Hà Giang
+    - Cao Bằng
+    - Bắc Kạn
+    - Tuyên Quang
+    - Lạng Sơn
+    - Sơn La
+    - Điện Biên
+    - Lai Châu
+    - Yên Bái
+    - Ninh Bình
+    - Thanh Hóa
+    - Nghệ An
+    - Hà Tĩnh
+    - Quảng Bình
+    - Quảng Trị
+    - An Giang
+    - Bạc Liêu
+    - Bến Tre
+    - Cà Mau
+    - Đồng Tháp
+    - Hậu Giang
+    - Long An
+    - Sóc Trăng
+    - Tiền Giang
+    - Trà Vinh
+    - Vĩnh Long
+    - Tây Ninh
+    - Bình Dương
+    - Bình Phước
+    - Đồng Nai
+
+- lookup: category
+  examples: |
+    - biển
+    - bãi biển
+    - núi
+    - miền núi
+    - thành phố
+    - phố cổ
+    - làng nghề
+    - di tích
+    - lịch sử
+    - văn hóa
+    - sinh thái
+    - thiên nhiên
+    - đảo
+    - vịnh
+    - hang động
+    - thác nước
+    - suối
+    - hồ
+    - đầm
+    - sông
+    - rừng
+    - vườn quốc gia
+    - danh lam thắng cảnh
+    - khu du lịch
+    - resort
+    - chùa
+    - đền
+    - miếu
+    - nhà thờ
+    - công viên
+    - bảo tàng
+    - khu vui chơi
+    - khu nghỉ dưỡng
+
+- lookup: cuisine_type
+  examples: |
+    - hải sản
+    - món Việt
+    - món Việt Nam
+    - món Nhật
+    - món Hàn
+    - món Thái
+    - món Trung
+    - món Âu
+    - món Pháp
+    - món Ý
+    - món Mỹ
+    - buffet
+    - lẩu
+    - nướng
+    - BBQ
+    - phở
+    - bún
+    - mì
+    - cơm
+    - bánh mì
+    - bánh xèo
+    - nem
+    - chả giò
+    - gỏi cuốn
+    - cao lầu
+    - mì Quảng
+    - bún bò Huế
+    - cơm tấm
+    - hủ tiếu
+    - bún chả
+    - chả cá
+    - dimsum
+    - sushi
+    - ramen
+    - udon
+    - hotpot
+    - pizza
+    - pasta
+    - burger
+    - steak
+    - tacos
+    - chay
+    - vegetarian
+    - vegan
+    - fusion
+    - street food
+    - đường phố
+    - ăn vặt
+    - tráng miệng
+    - chè
+    - kem
+    - bánh ngọt
+    - cà phê
+    - trà sữa
+
+- lookup: activity_type
+  examples: |
+    - tham quan
+    - du lịch
+    - khám phá
+    - vui chơi
+    - giải trí
+    - thể thao
+    - mạo hiểm
+    - văn hóa
+    - lịch sử
+    - lặn biển
+    - snorkeling
+    - diving
+    - scuba
+    - lướt ván
+    - surfing
+    - chèo thuyền
+    - kayak
+    - sup
+    - jet ski
+    - parasailing
+    - dù lượn
+    - paragliding
+    - zipline
+    - bungee jumping
+    - rafting
+    - canyoning
+    - trekking
+    - hiking
+    - leo núi
+    - climbing
+    - đi bộ đường dài
+    - cắm trại
+    - camping
+    - săn mây
+    - ngắm bình minh
+    - ngắm hoàng hôn
+    - chụp ảnh
+    - photography
+    - tour ẩm thực
+    - food tour
+    - cooking class
+    - nấu ăn
+    - spa
+    - massage
+    - yoga
+    - meditation
+    - thiền
+    - đạp xe
+    - cycling
+    - xe máy
+    - motorbike
+    - xe jeep
+    - safari
+    - câu cá
+    - fishing
+    - chơi golf
+    - golf
+    - shopping
+    - mua sắm
+    - chợ đêm
+    - night market
+    - show diễn
+    - biểu diễn
+    - múa rối nước
+    - ca nhạc
+    - bar
+    - club
+    - pub
+    - karaoke
+    - team building
+    - trải nghiệm
+    - làm nghề thủ công
+
+- lookup: transport_type
+  examples: |
+    - máy bay
+    - plane
+    - flight
+    - tàu hỏa
+    - train
+    - xe khách
+    - bus
+    - xe buýt
+    - coach
+    - limousine
+    - taxi
+    - grab
+    - be
+    - xe ôm
+    - motorbike taxi
+    - xe máy
+    - motorbike
+    - xe đạp
+    - bicycle
+    - xe đạp điện
+    - xe điện
+    - electric bike
+    - ô tô
+    - car
+    - thuê xe
+    - car rental
+    - tự lái
+    - self-drive
+    - có tài xế
+    - with driver
+    - xe đưa đón
+    - shuttle
+    - phà
+    - ferry
+    - tàu cao tốc
+    - speed boat
+    - du thuyền
+    - cruise
+    - thuyền
+    - boat
+
+- lookup: amenities
+  examples: |
+    - bể bơi
+    - swimming pool
+    - hồ bơi
+    - spa
+    - gym
+    - phòng gym
+    - fitness
+    - ăn sáng
+    - breakfast
+    - wifi
+    - free wifi
+    - điều hòa
+    - air conditioner
+    - TV
+    - tivi
+    - tủ lạnh
+    - minibar
+    - ban công
+    - balcony
+    - view biển
+    - sea view
+    - view núi
+    - mountain view
+    - view sông
+    - river view
+    - view thành phố
+    - city view
+    - bãi đậu xe
+    - parking
+    - nhà hàng
+    - restaurant
+    - quầy bar
+    - bar
+    - phòng họp
+    - meeting room
+    - dịch vụ giặt ủi
+    - laundry
+    - đưa đón sân bay
+    - airport transfer
+    - lễ tân 24/7
+    - 24h reception
+    - thang máy
+    - elevator
+    - an ninh
+    - security
+    - két sắt
+    - safe box
+    - phòng không hút thuốc
+    - non-smoking
+    - thú cưng
+    - pet-friendly
+    - câu lạc bộ trẻ em
+    - kids club
+    - sân chơi
+    - playground
+    - nhạc sống
+    - live music
+    - karaoke
+    - vườn
+    - garden
+    - bãi biển riêng
+    - private beach
+    - hồ bơi riêng
+    - private pool
+
+- lookup: price_range
+  examples: |
+    - rẻ
+    - giá rẻ
+    - cheap
+    - budget
+    - bình dân
+    - tiết kiệm
+    - dưới 500k
+    - dưới 500
+    - dưới 1 triệu
+    - dưới 1tr
+    - trung bình
+    - vừa phải
+    - moderate
+    - 500k-1tr
+    - 1-2 triệu
+    - 1-2tr
+    - cao cấp
+    - sang trọng
+    - luxury
+    - đắt
+    - high-end
+    - premium
+    - trên 2 triệu
+    - trên 2tr
+    - 5 sao
+    - five star
+
+- lookup: traveler_type
+  examples: |
+    - một mình
+    - solo
+    - single
+    - couple
+    - cặp đôi
+    - hai người
+    - vợ chồng
+    - bạn trai bạn gái
+    - gia đình
+    - family
+    - cả nhà
+    - bố mẹ con
+    - nhóm
+    - group
+    - bạn bè
+    - friends
+    - đồng nghiệp
+    - colleagues
+    - backpacker
+    - phượt thủ
+    - ba lô
+    - sinh viên
+    - student
+    - người già
+    - elderly
+    - cao tuổi
+    - senior
+    - trẻ em
+    - children
+    - kids
+    - em bé
+    - baby
+    - thanh niên
+    - youth
+    - doanh nhân
+    - business
+
+- lookup: star_rating
+  examples: |
+    - 1 sao
+    - 2 sao
+    - 3 sao
+    - 4 sao
+    - 5 sao
+    - một sao
+    - hai sao
+    - ba sao
+    - bốn sao
+    - năm sao
+    - 1 star
+    - 2 star
+    - 3 star
+    - 4 star
+    - 5 star
+
+- lookup: month
+  examples: |
+    - tháng 1
+    - tháng 2
+    - tháng 3
+    - tháng 4
+    - tháng 5
+    - tháng 6
+    - tháng 7
+    - tháng 8
+    - tháng 9
+    - tháng 10
+    - tháng 11
+    - tháng 12
+    - tháng một
+    - tháng hai
+    - tháng ba
+    - tháng tư
+    - tháng năm
+    - tháng sáu
+    - tháng bảy
+    - tháng tám
+    - tháng chín
+    - tháng mười
+    - tháng mười một
+    - tháng mười hai
+    - january
+    - february
+    - march
+    - april
+    - may
+    - june
+    - july
+    - august
+    - september
+    - october
+    - november
+    - december
+
+- lookup: season
+  examples: |
+    - mùa xuân
+    - xuân
+    - spring
+    - mùa hạ
+    - mùa hè
+    - hè
+    - summer
+    - mùa thu
+    - thu
+    - autumn
+    - fall
+    - mùa đông
+    - đông
+    - winter
+    - mùa mưa
+    - mưa
+    - rainy season
+    - mùa khô
+    - khô
+    - dry season
+    - mùa lũ
+    - mùa bão
+    - tết
+    - tết nguyên đán
+    - lunar new year
+    - cuối năm
+    - đầu năm
+    - hè này
+    - mùa hè này
+    - hè năm nay

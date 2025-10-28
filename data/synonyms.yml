@@ -1,0 +1,449 @@
+version: "3.1"
+
+nlu:
+- synonym: biển
+  examples: |
+    - bãi biển
+    - bờ biển
+    - beach
+    - sea
+    - seaside
+    - ven biển
+    - bãi tắm
+
+- synonym: núi
+  examples: |
+    - miền núi
+    - vùng núi
+    - cao nguyên
+    - mountain
+    - đồi núi
+    - miền cao
+
+- synonym: khách sạn
+  examples: |
+    - hotel
+    - resort
+    - nơi ở
+    - chỗ ngủ
+    - chỗ ở
+    - accommodation
+    - nhà nghỉ
+
+- synonym: nhà hàng
+  examples: |
+    - quán ăn
+    - restaurant
+    - chỗ ăn
+    - quán
+    - điểm ăn uống
+
+- synonym: giá rẻ
+  examples: |
+    - rẻ
+    - bình dân
+    - tiết kiệm
+    - cheap
+    - budget
+    - giá sinh viên
+    - giá phải chăng
+    - tầm 500k
+    - dưới 500k
+    - dưới 1 triệu
+
+- synonym: trung bình
+  examples: |
+    - vừa phải
+    - tầm trung
+    - moderate
+    - giá ổn
+    - tầm 1 triệu
+    - 1-2 triệu
+
+- synonym: cao cấp
+  examples: |
+    - sang trọng
+    - luxury
+    - đắt
+    - high-end
+    - xịn
+    - 5 sao
+    - hạng sang
+    - premium
+    - trên 2 triệu
+
+- synonym: Đà Nẵng
+  examples: |
+    - Da Nang
+    - Danang
+    - ĐN
+    - đà nẵng
+
+- synonym: Hà Nội
+  examples: |
+    - Ha Noi
+    - Hanoi
+    - HN
+    - thủ đô
+    - hà nội
+
+- synonym: Sài Gòn
+  examples: |
+    - Ho Chi Minh
+    - TPHCM
+    - TP HCM
+    - Saigon
+    - SG
+    - sài gòn
+    - thành phố Hồ Chí Minh
+
+- synonym: Phú Quốc
+  examples: |
+    - Phu Quoc
+    - đảo ngọc
+    - phú quốc
+
+- synonym: Nha Trang
+  examples: |
+    - nha trang
+    - NT
+
+- synonym: Hội An
+  examples: |
+    - Hoi An
+    - phố cổ Hội An
+    - hội an
+
+- synonym: Sapa
+  examples: |
+    - Sa Pa
+    - sapa
+    - Lào Cai
+
+- synonym: Đà Lạt
+  examples: |
+    - Da Lat
+    - Dalat
+    - thành phố ngàn hoa
+    - đà lạt
+
+- synonym: Hạ Long
+  examples: |
+    - Ha Long
+    - vịnh Hạ Long
+    - Halong Bay
+    - hạ long
+
+- synonym: Vũng Tàu
+  examples: |
+    - Vung Tau
+    - vũng tàu
+    - VT
+
+- synonym: Mũi Né
+  examples: |
+    - Mui Ne
+    - mũi né
+    - Phan Thiết
+
+- synonym: miền Bắc
+  examples: |
+    - Bắc Bộ
+    - Northern Vietnam
+    - phía Bắc
+    - miền bắc
+
+- synonym: miền Trung
+  examples: |
+    - Central Vietnam
+    - Trung Bộ
+    - phía Trung
+    - miền trung
+
+- synonym: miền Nam
+  examples: |
+    - Southern Vietnam
+    - Nam Bộ
+    - phía Nam
+    - miền nam
+
+- synonym: hải sản
+  examples: |
+    - seafood
+    - đồ biển
+    - món biển
+    - hải sản tươi sống
+
+- synonym: món Việt
+  examples: |
+    - Vietnamese food
+    - đồ Việt
+    - món Việt Nam
+    - ẩm thực Việt
+
+- synonym: món Nhật
+  examples: |
+    - Japanese food
+    - đồ Nhật
+    - món Nhật Bản
+    - sushi
+
+- synonym: món Hàn
+  examples: |
+    - Korean food
+    - đồ Hàn
+    - món Hàn Quốc
+    - kimbap
+
+- synonym: món Âu
+  examples: |
+    - Western food
+    - đồ Tây
+    - món Tây
+    - món châu Âu
+
+- synonym: buffet
+  examples: |
+    - büfê
+    - ăn tự chọn
+    - all you can eat
+
+- synonym: tham quan
+  examples: |
+    - du lịch
+    - sightseeing
+    - xem
+    - visit
+    - khám phá
+
+- synonym: vui chơi
+  examples: |
+    - giải trí
+    - entertainment
+    - hoạt động
+    - chơi
+
+- synonym: thể thao
+  examples: |
+    - sport
+    - sports
+    - mạo hiểm
+    - adventure
+
+- synonym: văn hóa
+  examples: |
+    - culture
+    - di sản
+    - lịch sử
+    - truyền thống
+
+- synonym: lặn biển
+  examples: |
+    - diving
+    - lặn
+    - scuba
+    - snorkeling
+    - bơi lặn
+
+- synonym: trekking
+  examples: |
+    - đi bộ đường dài
+    - hiking
+    - leo núi
+    - trekk
+
+- synonym: máy bay
+  examples: |
+    - plane
+    - flight
+    - bay
+    - aircraft
+
+- synonym: xe khách
+  examples: |
+    - bus
+    - xe buýt
+    - xe đò
+    - coach
+
+- synonym: tàu hỏa
+  examples: |
+    - train
+    - tàu
+    - railway
+
+- synonym: taxi
+  examples: |
+    - cab
+    - xe ôm
+    - grab
+    - be
+
+- synonym: tháng 1
+  examples: |
+    - january
+    - t1
+    - 1
+
+- synonym: tháng 2
+  examples: |
+    - february
+    - t2
+    - 2
+
+- synonym: tháng 3
+  examples: |
+    - march
+    - t3
+    - 3
+
+- synonym: tháng 4
+  examples: |
+    - april
+    - t4
+    - 4
+
+- synonym: tháng 5
+  examples: |
+    - may
+    - t5
+    - 5
+
+- synonym: tháng 6
+  examples: |
+    - june
+    - t6
+    - 6
+
+- synonym: tháng 7
+  examples: |
+    - july
+    - t7
+    - 7
+
+- synonym: tháng 8
+  examples: |
+    - august
+    - t8
+    - 8
+
+- synonym: tháng 9
+  examples: |
+    - september
+    - t9
+    - 9
+
+- synonym: tháng 10
+  examples: |
+    - october
+    - t10
+    - 10
+
+- synonym: tháng 11
+  examples: |
+    - november
+    - t11
+    - 11
+
+- synonym: tháng 12
+  examples: |
+    - december
+    - t12
+    - 12
+
+- synonym: mùa hè
+  examples: |
+    - summer
+    - hè
+    - mùa nóng
+
+- synonym: mùa đông
+  examples: |
+    - winter
+    - đông
+    - mùa lạnh
+
+- synonym: mùa thu
+  examples: |
+    - autumn
+    - fall
+    - thu
+
+- synonym: mùa xuân
+  examples: |
+    - spring
+    - xuân
+
+- synonym: mùa mưa
+  examples: |
+    - rainy season
+    - mưa
+    - mùa mưa bão
+
+- synonym: mùa khô
+  examples: |
+    - dry season
+    - khô ráo
+
+- synonym: gia đình
+  examples: |
+    - family
+    - cả nhà
+    - bố mẹ con
+    - vợ chồng con
+
+- synonym: couple
+  examples: |
+    - cặp đôi
+    - 2 người
+    - vợ chồng
+    - bạn trai bạn gái
+
+- synonym: backpacker
+  examples: |
+    - phượt thủ
+    - ba lô
+    - balo
+    - du lịch bụi
+
+- synonym: 1 ngày
+  examples: |
+    - one day
+    - 1 day
+    - trong ngày
+
+- synonym: 2 ngày
+  examples: |
+    - two days
+    - 2 days
+    - 2 ngày 1 đêm
+
+- synonym: 3 ngày
+  examples: |
+    - three days
+    - 3 days
+    - 3 ngày 2 đêm
+
+- synonym: 4 ngày
+  examples: |
+    - four days
+    - 4 days
+    - 4 ngày 3 đêm
+
+- synonym: 5 ngày
+  examples: |
+    - five days
+    - 5 days
+    - 5 ngày 4 đêm
+
+- synonym: 1 tuần
+  examples: |
+    - one week
+    - 7 ngày
+    - bảy ngày
+
+- synonym: cuối tuần
+  examples: |
+    - weekend
+    - thứ 7 chủ nhật
+    - 2 ngày nghỉ

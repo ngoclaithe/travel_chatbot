@@ -1,0 +1,452 @@
+version: "3.1"
+
+responses:
+  utter_ask_rephrase:
+    - text: "Xin lỗi, tôi không hiểu. Bạn có thể nói lại được không?"
+    - text: "Bạn có thể diễn đạt theo cách khác không?"
+    
+  utter_no_results:
+    - text: "Xin lỗi, tôi không tìm thấy kết quả nào phù hợp với yêu cầu của bạn."
+    - text: "Không có kết quả cho tìm kiếm này. Bạn có muốn thử tìm kiếm khác không?"
+    
+  utter_multiple_results:
+    - text: "Tôi tìm thấy nhiều kết quả. Đây là top {count} kết quả phù hợp nhất:"
+    
+  utter_confirm_destination:
+    - text: "Bạn muốn tìm hiểu thêm về {destination}, đúng không?"
+    
+  utter_confirm_booking:
+    - text: "Bạn có chắc muốn đặt {hotel_name} không?"
+    
+  utter_weather_good:
+    - text: "Thời tiết tại {destination} vào {month} rất đẹp! 🌞"
+    
+  utter_weather_bad:
+    - text: "Thời tiết tại {destination} vào {month} không thuận lợi cho du lịch. Bạn có muốn biết thời điểm tốt hơn không?"
+    
+  utter_budget_sufficient:
+    - text: "Với ngân sách {budget}, bạn có thể có một chuyến đi thoải mái!"
+    
+  utter_budget_tight:
+    - text: "Ngân sách {budget} hơi eo hẹp. Tôi sẽ tìm các lựa chọn tiết kiệm cho bạn nhé!"
+    
+  utter_provide_more_info:
+    - text: "Để tôi tư vấn chính xác hơn, bạn có thể cho tôi biết thêm về:"
+      buttons:
+        - title: "Ngân sách"
+          payload: "/ask_budget_recommendation"
+        - title: "Thời gian đi"
+          payload: "/ask_best_time"
+        - title: "Số người đi"
+          payload: "/inform"
+          
+  utter_suggest_alternatives:
+    - text: "Bạn cũng có thể quan tâm đến những điểm đến tương tự:"
+    
+  utter_transportation_options:
+    - text: "Có nhiều cách để di chuyển từ {from_location} đến {to_location}:"
+    
+  utter_ask_more_help:
+    - text: "Tôi có thể giúp gì thêm cho chuyến đi của bạn?"
+      buttons:
+        - title: "Tìm nhà hàng"
+          payload: "/search_restaurant"
+        - title: "Hoạt động vui chơi"
+          payload: "/search_activity"
+        - title: "Xem tour"
+          payload: "/search_tour"
+        - title: "Hỏi thời tiết"
+          payload: "/ask_weather"
+          
+  utter_popular_destinations:
+    - text: "Một số điểm đến được yêu thích nhất Việt Nam:"
+      buttons:
+        - title: "🏖️ Đà Nẵng"
+          payload: "/search_destination{\"destination\": \"Đà Nẵng\"}"
+        - title: "🏝️ Phú Quốc"
+          payload: "/search_destination{\"destination\": \"Phú Quốc\"}"
+        - title: "🏘️ Hội An"
+          payload: "/search_destination{\"destination\": \"Hội An\"}"
+        - title: "⛰️ Sapa"
+          payload: "/search_destination{\"destination\": \"Sapa\"}"
+        - title: "🏞️ Hạ Long"
+          payload: "/search_destination{\"destination\": \"Hạ Long\"}"
+        - title: "🌸 Đà Lạt"
+          payload: "/search_destination{\"destination\": \"Đà Lạt\"}"
+          
+  utter_seasonal_recommendations:
+    - text: "Dựa vào thời điểm hiện tại, tôi gợi ý một số điểm đến:"
+    
+  utter_travel_tips_general:
+    - text: |
+        💡 Mẹo du lịch Việt Nam:
+        • Đổi tiền ở ngân hàng hoặc ATM chính thức
+        • Mua sim 4G tại sân bay hoặc cửa hàng chính hãng
+        • Sử dụng Grab/Be để di chuyển an toàn
+        • Thương lượng giá ở chợ
+        • Mang theo thuốc cá nhân và kem chống nắng
+        • Tôn trọng văn hóa địa phương
+        
+  utter_safety_tips:
+    - text: |
+        🛡️ An toàn khi du lịch:
+        • Giữ tài sản cá nhân cẩn thận
+        • Không để xe không người trông coi
+        • Cẩn thận với người lạ quá thân thiện
+        • Lưu số điện thoại khẩn cấp
+        • Mua bảo hiểm du lịch
+        • Thông báo lịch trình cho người thân
+        
+  utter_packing_tips:
+    - text: |
+        🎒 Chuẩn bị hành lý:
+        • Quần áo phù hợp với thời tiết
+        • Giày thoải mái để đi bộ
+        • Thuốc cá nhân và thuốc cơ bản
+        • Kem chống nắng, mũ, kính
+        • Sạc điện thoại, pin dự phòng
+        • Giấy tờ tùy thân
+        • Tiền mặt và thẻ
+        
+  utter_food_safety:
+    - text: |
+        🍜 An toàn vệ sinh thực phẩm:
+        • Chọn quán đông khách
+        • Ăn đồ nấu chín kỹ
+        • Uống nước đóng chai
+        • Cẩn thận với đá lạnh
+        • Rửa tay trước khi ăn
+        
+  utter_beach_activities:
+    - text: "Hoạt động tại bãi biển:"
+      buttons:
+        - title: "🤿 Lặn biển"
+          payload: "/search_activity{\"activity_type\": \"lặn biển\"}"
+        - title: "🏄 Lướt ván"
+          payload: "/search_activity{\"activity_type\": \"lướt ván\"}"
+        - title: "🚤 Tàu cao tốc"
+          payload: "/search_activity{\"activity_type\": \"tàu cao tốc\"}"
+        - title: "🏖️ Tắm biển"
+          payload: "/search_activity{\"activity_type\": \"tắm biển\"}"
+          
+  utter_mountain_activities:
+    - text: "Hoạt động tại vùng núi:"
+      buttons:
+        - title: "🥾 Trekking"
+          payload: "/search_activity{\"activity_type\": \"trekking\"}"
+        - title: "⛰️ Leo núi"
+          payload: "/search_activity{\"activity_type\": \"leo núi\"}"
+        - title: "🏕️ Cắm trại"
+          payload: "/search_activity{\"activity_type\": \"cắm trại\"}"
+        - title: "🌄 Săn mây"
+          payload: "/search_activity{\"activity_type\": \"săn mây\"}"
+          
+  utter_city_activities:
+    - text: "Hoạt động tại thành phố:"
+      buttons:
+        - title: "🏛️ Tham quan"
+          payload: "/search_activity{\"activity_type\": \"tham quan\"}"
+        - title: "🛍️ Mua sắm"
+          payload: "/search_activity{\"activity_type\": \"mua sắm\"}"
+        - title: "🍜 Tour ẩm thực"
+          payload: "/search_activity{\"activity_type\": \"tour ẩm thực\"}"
+        - title: "🎭 Văn hóa"
+          payload: "/search_activity{\"activity_type\": \"văn hóa\"}"
+          
+  utter_budget_ranges:
+    - text: |
+        💰 Phân loại ngân sách du lịch (1 người/ngày):
+        
+        • Tiết kiệm: 500k-1tr VNĐ
+          - Hostel/homestay
+          - Ăn quán bình dân
+          - Di chuyển công cộng
+        
+        • Trung bình: 1-2tr VNĐ
+          - Khách sạn 3-4 sao
+          - Nhà hàng trung bình
+          - Taxi/Grab
+        
+        • Cao cấp: 2-5tr VNĐ
+          - Resort 5 sao
+          - Nhà hàng sang trọng
+          - Tour riêng
+          
+  utter_best_time_general:
+    - text: |
+        📅 Thời điểm du lịch Việt Nam:
+        
+        🌞 Miền Bắc:
+        • Tốt nhất: 3-5, 9-11 (mát mẻ)
+        • Tránh: 12-2 (lạnh), 6-8 (nóng)
+        
+        🌴 Miền Trung:
+        • Tốt nhất: 2-5 (khô ráo)
+        • Tránh: 9-12 (mưa bão)
+        
+        ☀️ Miền Nam:
+        • Tốt nhất: 11-4 (khô)
+        • Tránh: 5-10 (mưa)
+        
+  utter_visa_info:
+    - text: |
+        📋 Thông tin Visa Việt Nam:
+        
+        • ASEAN: Miễn visa 30 ngày
+        • Nhiều quốc gia: Miễn visa 15-45 ngày
+        • E-visa: 90 ngày (online)
+        • Visa on arrival: Có sẵn tại sân bay
+        
+        📱 Kiểm tra: https://evisa.xuatnhapcanh.gov.vn
+        
+  utter_currency_info:
+    - text: |
+        💵 Tiền tệ Việt Nam:
+        
+        • Đơn vị: VNĐ (Đồng)
+        • 1 USD ≈ 24,000 VNĐ
+        • Nơi đổi tiền:
+          - Ngân hàng
+          - ATM (rút tiền)
+          - Tiệm vàng uy tín
+        • Thẻ: Chấp nhận rộng rãi tại thành phố
+        
+  utter_transportation_vietnam:
+    - text: |
+        🚗 Phương tiện di chuyển VN:
+        
+        ✈️ Máy bay: Nhanh, giữa các thành phố lớn
+        🚄 Tàu hỏa: Ngắm cảnh, đi dọc bờ biển
+        🚌 Xe khách: Rẻ, nhiều tuyến
+        🚗 Thuê xe: Tự do, cần bằng lái
+        🏍️ Xe máy: Phổ biến, linh hoạt
+        📱 Grab/Be: An toàn, giá cố định
+        
+  utter_climate_zones:
+    - text: |
+        🌡️ Khí hậu Việt Nam:
+        
+        🌨️ Miền Bắc: 4 mùa rõ rệt
+        • Xuân (2-4): Ấm, mưa phùn
+        • Hạ (5-8): Nóng ẩm 35°C+
+        • Thu (9-11): Mát mẻ, đẹp nhất
+        • Đông (12-1): Lạnh 10-15°C
+        
+        ☀️ Miền Trung: Nắng nóng + mưa bão
+        • Khô (2-7): Nắng gắt
+        • Mưa (8-1): Bão lũ
+        
+        🌴 Miền Nam: Nhiệt đới
+        • Khô (11-4): Nắng đẹp
+        • Mưa (5-10): Mưa chiều
+        
+  utter_emergency_contacts:
+    - text: |
+        🆘 Số điện thoại khẩn cấp:
+        
+        • Cảnh sát: 113
+        • Cứu hỏa: 114
+        • Cấp cứu: 115
+        • Tổng đài du lịch: 1080
+        
+  utter_top_beaches:
+    - text: "🏖️ Top bãi biển Việt Nam:"
+      buttons:
+        - title: "Mỹ Khê - Đà Nẵng"
+          payload: "/search_destination{\"destination\": \"Mỹ Khê\"}"
+        - title: "Bãi Sao - Phú Quốc"
+          payload: "/search_destination{\"destination\": \"Phú Quốc\"}"
+        - title: "Mũi Né - Phan Thiết"
+          payload: "/search_destination{\"destination\": \"Mũi Né\"}"
+        - title: "Bãi Dài - Nha Trang"
+          payload: "/search_destination{\"destination\": \"Nha Trang\"}"
+        - title: "Cửa Đại - Hội An"
+          payload: "/search_destination{\"destination\": \"Hội An\"}"
+          
+  utter_top_mountains:
+    - text: "⛰️ Top địa điểm miền núi:"
+      buttons:
+        - title: "Sapa - Lào Cai"
+          payload: "/search_destination{\"destination\": \"Sapa\"}"
+        - title: "Đà Lạt - Lâm Đồng"
+          payload: "/search_destination{\"destination\": \"Đà Lạt\"}"
+        - title: "Hà Giang Loop"
+          payload: "/search_destination{\"destination\": \"Hà Giang\"}"
+        - title: "Mộc Châu - Sơn La"
+          payload: "/search_destination{\"destination\": \"Mộc Châu\"}"
+        - title: "Tam Đảo - Vĩnh Phúc"
+          payload: "/search_destination{\"destination\": \"Tam Đảo\"}"
+          
+  utter_unesco_sites:
+    - text: |
+        🏛️ Di sản UNESCO Việt Nam:
+        
+        Văn hóa:
+        • Khu phố cổ Hội An
+        • Cố đô Huế
+        • Thánh địa Mỹ Sơn
+        • Hoàng thành Thăng Long
+        • Thành nhà Hồ
+        
+        Thiên nhiên:
+        • Vịnh Hạ Long
+        • Vườn quốc gia Phong Nha-Kẻ Bàng
+        • Quần thể danh thắng Tràng An
+        
+  utter_vietnamese_food:
+    - text: |
+        🍜 Món ăn Việt Nam nổi tiếng:
+        
+        🥖 Bánh mì: Bánh mì kẹp đủ loại
+        🍲 Phở: Món quốc hồn quốc túy
+        🥢 Bún chả: Đặc sản Hà Nội
+        🦀 Hải sản: Tươi ngon ven biển
+        🌯 Nem/Chả giò: Rán giòn ngon
+        🥗 Gỏi cuốn: Tươi mát, lành mạnh
+        ☕ Cà phê: Đậm đà, độc đáo
+        🍨 Chè: Món tráng miệng đa dạng
+        
+  utter_regional_specialties:
+    - text: |
+        🍽️ Đặc sản vùng miền:
+        
+        Miền Bắc:
+        • Phở Hà Nội, Bún chả, Chả cá
+        
+        Miền Trung:
+        • Bún bò Huế, Mì Quảng, Cao lầu
+        
+        Miền Nam:
+        • Bánh xèo, Hủ tiếu, Cơm tấm
+        
+  utter_festivals:
+    - text: |
+        🎉 Lễ hội Việt Nam:
+        
+        • Tết Nguyên Đán (1-2): Lễ lớn nhất
+        • Festival Huế (2 năm/lần): Văn hóa
+        • Lễ hội Hoa Đà Lạt (12): Triển lãm hoa
+        • Festival pháo hoa Đà Nẵng (4-6)
+        • Lễ hội đèn lồng Hội An (hàng tháng)
+        
+  utter_rainy_season_tips:
+    - text: |
+        ☔ Tips du lịch mùa mưa:
+        
+        ✅ Nên:
+        • Mang áo mưa, ô
+        • Mang dép/giày chống nước
+        • Đặt khách sạn có hoàn hủy linh hoạt
+        • Có kế hoạch B cho hoạt động trong nhà
+        • Kiểm tra dự báo thời tiết hàng ngày
+        
+        ❌ Tránh:
+        • Leo núi khi mưa to
+        • Tour biển khi sóng lớn
+        • Đi đường núi nguy hiểm
+        
+  utter_summer_tips:
+    - text: |
+        ☀️ Tips du lịch mùa hè:
+        
+        • Mang kem chống nắng SPF50+
+        • Đội mũ, đeo kính râm
+        • Mặc quần áo thoáng mát
+        • Uống nhiều nước
+        • Tránh ra ngoài 11h-15h
+        • Mang thuốc chống say nắng
+        
+  utter_winter_tips:
+    - text: |
+        ❄️ Tips du lịch mùa đông (Miền Bắc):
+        
+        • Mang áo ấm, áo khoác dày
+        • Chuẩn bị quần áo nhiều lớp
+        • Mang khăn, găng tay, mũ len
+        • Đặt khách sạn có máy sưởi
+        • Uống đồ nóng giữ ấm
+        • Cẩn thận khi đường trơn
+        
+  utter_photography_tips:
+    - text: |
+        📸 Tips chụp ảnh du lịch:
+        
+        • Thời điểm vàng: 6-8h sáng, 16-18h chiều
+        • Tránh chụp giữa trưa (ánh sáng gắt)
+        • Mang pin dự phòng, thẻ nhớ
+        • Hỏi phép trước khi chụp người
+        • Tôn trọng nơi cấm chụp ảnh
+        • Dậy sớm tránh đông người
+        
+  utter_solo_travel_tips:
+    - text: |
+        👤 Tips du lịch một mình:
+        
+        ✅ An toàn:
+        • Thông báo lịch trình cho người thân
+        • Lưu số điện thoại khẩn cấp
+        • Ở khu vực an toàn
+        • Không đi ra ngoài quá kênh
+        • Tin tưởng trực giác của bạn
+        
+        💡 Tiết kiệm:
+        • Ở hostel/homestay gặp người mới
+        • Tham gia tour ghép đoàn
+        • Ăn ở quán địa phương
+        
+  utter_group_travel_tips:
+    - text: |
+        👥 Tips du lịch nhóm:
+        
+        • Lập ngân sách chung rõ ràng
+        • Thảo luận lịch trình trước
+        • Chọn trưởng nhóm điều phối
+        • Linh hoạt với ý kiến mọi người
+        • Đặt chỗ trước cho nhóm lớn
+        • Có giờ tự do cá nhân
+        
+  utter_family_travel_tips:
+    - text: |
+        👨‍👩‍👧‍👦 Tips du lịch gia đình:
+        
+        • Chọn khách sạn có tiện nghi trẻ em
+        • Mang theo đồ chơi, sách
+        • Lên lịch nghỉ ngơi hợp lý
+        • Chuẩn bị đồ ăn vặt
+        • Chọn hoạt động phù hợp mọi lứa tuổi
+        • Mang thuốc cơ bản cho trẻ
+        • Đặt chỗ có không gian rộng
+        
+  utter_backpacker_tips:
+    - text: |
+        🎒 Tips cho backpacker:
+        
+        • Đóng gói nhẹ, chỉ mang cần thiết
+        • Ở hostel/homestay giá rẻ
+        • Ăn quán vỉa hè bình dân
+        • Di chuyển bằng xe buýt
+        • Mua sim 4G để dùng bản đồ
+        • Mang bình nước tái sử dụng
+        • Linh hoạt lịch trình
+        
+  utter_honeymoon_tips:
+    - text: |
+        💑 Tips cho tuần trăng mật:
+        
+        • Chọn resort sang trọng, riêng tư
+        • Đặt phòng honeymoon suite
+        • Đặt bàn ăn lãng mạn
+        • Tham gia spa couple
+        • Ngắm hoàng hôn/bình minh cùng nhau
+        • Có thời gian riêng tư
+        • Chụp ảnh cưới đẹp
+        
+  utter_confirm_search:
+    - text: "Tôi sẽ tìm kiếm {category} tại {destination} cho bạn nhé!"
+    
+  utter_processing:
+    - text: "Đang tìm kiếm... ⏳"
+    - text: "Chờ một chút nhé... 🔍"
+    
+  utter_found_results:
+    - text: "Tìm thấy {count} kết quả! ✨"

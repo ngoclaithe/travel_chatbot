@@ -1,6 +1,7 @@
 version: "3.1"
 
 rules:
+
 - rule: Say goodbye anytime the user says goodbye
   steps:
   - intent: goodbye
@@ -11,7 +12,42 @@ rules:
   - intent: greet
   - action: utter_greet
 
+- rule: Say you are welcome when user thanks
+  steps:
+  - intent: thank
+  - action: utter_you_are_welcome
+
+- rule: Handle bot challenge
+  steps:
+  - intent: bot_challenge
+  - action: utter_iamabot
+
+- rule: Handle out of scope
+  steps:
+  - intent: out_of_scope
+  - action: utter_out_of_scope
+
 - rule: Ask the user to rephrase when low NLU confidence
   steps:
   - intent: nlu_fallback
   - action: utter_ask_clarification
+
+- rule: Activate search destination form
+  condition:
+  - active_loop: search_destination_form
+  steps:
+  - action: search_destination_form
+  - active_loop: null
+  - slot_was_set:
+    - requested_slot: null
+  - action: action_search_destination
+
+- rule: Activate search hotel form
+  condition:
+  - active_loop: search_hotel_form
+  steps:
+  - action: search_hotel_form
+  - active_loop: null
+  - slot_was_set:
+    - requested_slot: null
+  - action: action_search_hotel

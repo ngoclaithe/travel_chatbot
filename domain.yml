@@ -5,15 +5,32 @@ intents:
   - goodbye
   - affirm
   - deny
+  - thank
+  - bot_challenge
+  - out_of_scope
   - search_destination
   - search_hotel
   - search_restaurant
   - search_activity
   - search_tour
   - ask_weather
+  - ask_best_time
   - ask_transportation
   - get_reviews
   - ask_budget_recommendation
+  - compare_destinations
+  - ask_travel_tips
+  - ask_travel_documents
+  - ask_special_requirements
+  - ask_packing_list
+  - ask_local_culture
+  - ask_photography_spots
+  - ask_nightlife
+  - ask_family_activities
+  - ask_adventure_activities
+  - ask_romantic_spots
+  - ask_food_tour
+  - inform
 
 entities:
   - destination
@@ -21,95 +38,297 @@ entities:
   - region
   - category
   - hotel_name
+  - restaurant_name
+  - tour_name
   - star_rating
   - price_range
   - cuisine_type
   - activity_type
   - duration
   - month
+  - season
   - from_location
   - to_location
   - transport_type
+  - budget
+  - budget_type
+  - traveler_type
+  - traveler_count
+  - amenities
+  - location
+  - weather
+  - document
+  - special_need
+  - item
+  - etiquette
+  - culture
+  - souvenir
+  - event
+  - purpose
+  - gender
+  - diet
+  - health
+  - insurance
+  - telecom
+  - currency
+  - service
+  - safety
+  - language
+  - scam
+  - crowd
+  - tour_type
+  - departure
 
 slots:
   destination:
     type: text
+    influence_conversation: true
     mappings:
       - type: from_entity
         entity: destination
-  
+
   province:
     type: text
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: province
-  
+
   region:
     type: text
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: region
-  
+
   category:
     type: text
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: category
-  
-  price_range:
-    type: text
-    mappings:
-      - type: from_entity
-        entity: price_range
-  
+
   star_rating:
     type: text
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: star_rating
-  
+
+  price_range:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: price_range
+
   cuisine_type:
     type: text
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: cuisine_type
-  
+
   activity_type:
     type: text
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: activity_type
-  
+
   month:
     type: text
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: month
-  
+
+  season:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: season
+
   from_location:
     type: text
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: from_location
-  
+
   to_location:
     type: text
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: to_location
 
+  duration:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: duration
+
+  budget:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: budget
+
+  budget_type:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: budget_type
+
+  traveler_type:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: traveler_type
+
+  traveler_count:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: traveler_count
+
+  amenities:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: amenities
+
+  transport_type:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: transport_type
+
+  tour_type:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: tour_type
+
+  purpose:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: purpose
+
+  requested_slot:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: requested_slot
+
 responses:
   utter_greet:
-    - text: "Xin chào! Tôi là trợ lý du lịch. Tôi có thể giúp bạn tìm điểm đến, khách sạn, nhà hàng hay lên kế hoạch cho chuyến đi. Bạn cần gì?"
-  
+    - text: "Xin chào! Tôi là trợ lý du lịch Việt Nam. Tôi có thể giúp bạn:"
+      buttons:
+        - title: "🏖️ Tìm điểm đến"
+          payload: "/search_destination"
+        - title: "🏨 Tìm khách sạn"
+          payload: "/search_hotel"
+        - title: "🍜 Tìm nhà hàng"
+          payload: "/search_restaurant"
+        - title: "🎭 Hoạt động vui chơi"
+          payload: "/search_activity"
+    - text: "Chào bạn! Tôi là chatbot tư vấn du lịch. Bạn muốn đi đâu?"
+    - text: "Xin chào! Hãy cho tôi biết bạn đang tìm kiếm điều gì để tôi giúp nhé! 😊"
+
   utter_goodbye:
-    - text: "Chúc bạn có chuyến đi vui vẻ! Hẹn gặp lại!"
-  
+    - text: "Chúc bạn có chuyến đi vui vẻ! Hẹn gặp lại! 👋"
+    - text: "Tạm biệt! Chúc bạn có những trải nghiệm tuyệt vời! ✈️"
+    - text: "Bye bye! Du lịch an toàn nhé! 🌏"
+
+  utter_you_are_welcome:
+    - text: "Không có gì! Rất vui được giúp bạn 😊"
+    - text: "Luôn sẵn sàng hỗ trợ bạn!"
+    - text: "Rất hân hạnh! Nếu cần gì thêm cứ hỏi nhé!"
+
+  utter_iamabot:
+    - text: "Tôi là chatbot tư vấn du lịch, được tạo ra để giúp bạn lên kế hoạch cho chuyến đi tại Việt Nam. Tôi có thể tìm kiếm điểm đến, khách sạn, nhà hàng, hoạt động và nhiều thông tin hữu ích khác!"
+    - text: "Tôi là trợ lý AI chuyên về du lịch Việt Nam. Tôi ở đây để giúp bạn lên kế hoạch cho chuyến đi hoàn hảo! 🤖"
+
+  utter_out_of_scope:
+    - text: "Xin lỗi, tôi chỉ có thể giúp bạn về thông tin du lịch Việt Nam thôi. Bạn có muốn tìm điểm đến, khách sạn hay nhà hàng không?"
+    - text: "Hmm, câu hỏi này nằm ngoài phạm vi của tôi. Tôi chỉ chuyên về du lịch Việt Nam. Tôi có thể giúp gì về chuyến đi của bạn?"
+
   utter_ask_clarification:
-    - text: "Bạn có thể nói rõ hơn được không?"
-  
+    - text: "Xin lỗi, tôi chưa hiểu rõ ý bạn. Bạn có thể nói rõ hơn được không?"
+    - text: "Bạn có thể diễn đạt lại câu hỏi được không? Tôi muốn hiểu rõ hơn để giúp bạn."
+    - text: "Hmm, tôi không chắc lắm. Bạn muốn tìm kiếm về điểm đến, khách sạn, nhà hàng hay hoạt động gì cụ thể?"
+
+  utter_ask_destination:
+    - text: "Bạn muốn đi đâu? Hãy cho tôi biết tên điểm đến nhé!"
+    - text: "Tên địa điểm bạn quan tâm là gì?"
+
+  utter_ask_province:
+    - text: "Bạn muốn tìm ở tỉnh/thành phố nào?"
+
+  utter_ask_region:
+    - text: "Bạn muốn đi miền Bắc, miền Trung hay miền Nam?"
+
+  utter_ask_category:
+    - text: "Bạn thích loại hình du lịch nào? (biển, núi, thành phố, văn hóa, sinh thái...)"
+
+  utter_ask_star_rating:
+    - text: "Bạn muốn tìm khách sạn mấy sao?"
+
+  utter_ask_price_range:
+    - text: "Bạn muốn tìm trong khoảng giá nào? (rẻ, trung bình, cao cấp)"
+
+  utter_ask_cuisine_type:
+    - text: "Bạn muốn ăn món gì? (Việt Nam, hải sản, Nhật, Hàn, Âu...)"
+
+  utter_ask_activity_type:
+    - text: "Bạn muốn tham gia hoạt động gì? (tham quan, vui chơi, thể thao, văn hóa...)"
+
+  utter_ask_duration:
+    - text: "Bạn dự định đi bao nhiêu ngày?"
+
+  utter_ask_month:
+    - text: "Bạn định đi vào tháng mấy?"
+
+  utter_ask_from_location:
+    - text: "Bạn xuất phát từ đâu?"
+
+  utter_ask_to_location:
+    - text: "Bạn muốn đi đến đâu?"
+
+  utter_ask_traveler_count:
+    - text: "Chuyến đi có bao nhiêu người?"
+
+  utter_ask_traveler_type:
+    - text: "Bạn đi một mình, cùng gia đình hay bạn bè?"
+
+  utter_ask_budget:
+    - text: "Ngân sách dự kiến của bạn là bao nhiêu?"
+
   utter_default:
-    - text: "Xin lỗi, tôi chưa hiểu câu hỏi của bạn. Bạn có thể hỏi về điểm đến, khách sạn, nhà hàng, hoạt động hay tour du lịch."
+    - text: "Xin lỗi, tôi không tìm thấy thông tin phù hợp. Bạn có thể hỏi cách khác không?"
+    - text: "Hmm, có vẻ tôi không có đủ thông tin về điều này. Bạn có muốn hỏi về điều gì khác không?"
+
+  utter_great:
+    - text: "Tuyệt vời! 👍"
+    - text: "Rất tốt!"
+    - text: "Perfect! ✨"
+
+  utter_booking_confirmed:
+    - text: "Thông tin tour đã được lưu. Bạn có thể liên hệ để đặt chỗ nhé!"
 
 actions:
   - action_search_destination
@@ -118,9 +337,33 @@ actions:
   - action_search_activity
   - action_search_tour
   - action_get_weather
+  - action_get_best_time
   - action_get_transportation
   - action_get_reviews
   - action_recommend_budget
+  - action_compare_destinations
+  - action_get_travel_tips
+  - action_get_travel_documents
+  - action_get_special_requirements
+  - action_get_packing_list
+  - action_get_local_culture
+  - action_get_photography_spots
+  - action_get_nightlife
+  - action_get_family_activities
+  - action_get_adventure_activities
+  - action_get_romantic_spots
+  - action_get_food_tour
+  - validate_search_destination_form
+  - validate_search_hotel_form
+
+forms:
+  search_destination_form:
+    required_slots:
+      - destination
+
+  search_hotel_form:
+    required_slots:
+      - destination
 
 session_config:
   session_expiration_time: 60
