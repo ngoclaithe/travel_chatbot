@@ -1,60 +1,111 @@
 from typing import Any, Text, Dict, List
-from rasa_sdk import Action, Tracker
+from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
+from rasa_sdk.types import DomainDict
+from rasa_sdk.events import SlotSet
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import json
-from rasa_sdk import FormValidationAction
-from rasa_sdk.types import DomainDict
+import logging
 
+logger = logging.getLogger(__name__)
+
+# Database connection configuration
 DB_CONFIG = {
     'host': 'localhost',
     'database': 'travel_chatbot',
     'user': 'postgres',
-    'password': 'test1234',
+    'password': 'your_password',
     'port': 5432
 }
 
 def get_db_connection():
     """Create database connection"""
-    return psycopg2.connect(**DB_CONFIG)
+    try:
+        return psycopg2.connect(**DB_CONFIG)
+    except Exception as e:
+        logger.error(f"Database connection error: {e}")
+        return None
 
 def format_results(results, entity_type):
     """Format database results into readable text"""
     if not results:
-        return "Xin lỗi, tôi không tìm thấy kết quả phù hợp."
+        return "Xin lỗi, tôi không tìm thấy kết quả phù hợp. Bạn có thể thử tìm kiếm khác không?"
     
     response = f"Tôi tìm thấy {len(results)} kết quả:\n\n"
     
-    for idx, item in enumerate(results[:5], 1):  
+    for idx, item in enumerate(results[:5], 1):
         if entity_type == 'destination':
-            response += f"{idx}. {item['name']} - {item['province']}\n"
-            response += f"   Loại: {item['category']}\n"
-            response += f"   Đánh giá: {item['rating']}/5\n"
-            response += f"   {item['description'][:100]}...\n\n"
+            response += f"{idx}. 📍 {item['name']}"
+            if item.get('province'):
+                response += f" - {item['province']}"
+            response += f"\n   ⭐ Đánh giá: {item.get('rating', 'N/A')}/5\n"
+            if item.get('category'):
+                response += f"   🏷️ Loại: {item['category']}\n"
+            if item.get('description'):
+                desc = item['description'][:100] + "..." if len(item['description']) > 100 else item['description']
+                response += f"   📝 {desc}\n"
+            response += "\n"
         
         elif entity_type == 'hotel':
-            response += f"{idx}. {item['name']}\n"
-            response += f"   Địa chỉ: {item['address']}\n"
-            response += f"   Hạng sao: {item['star_rating']} sao\n"
-            response += f"   Giá: {item['price_range']}\n\n"
+            response += f"{idx}. 🏨 {item['name']}\n"
+            if item.get('address'):
+                response += f"   📍 {item['address']}\n"
+            if item.get('star_rating'):
+                response += f"   ⭐ {item['star_rating']} sao\n"
+            if item.get('price_range'):
+                response += f"   💰 Giá: {item['price_range']}\n"
+            if item.get('amenities'):
+                try:
+                    amenities = json.loads(item['amenities']) if isinstance(item['amenities'], str) else item['amenities']
+                    if amenities and isinstance(amenities, list):
+                        response += f"   🎯 Tiện ích: {', '.join(amenities[:3])}\n"
+                except:
+                    pass
+            response += "\n"
         
         elif entity_type == 'restaurant':
-            response += f"{idx}. {item['name']}\n"
-            response += f"   Loại: {item['cuisine_type']}\n"
-            response += f"   Giá: {item['price_range']}\n"
-            response += f"   Đánh giá: {item['rating']}/5\n\n"
+            response += f"{idx}. 🍽️ {item['name']}\n"
+            if item.get('cuisine_type'):
+                response += f"   🍜 Loại: {item['cuisine_type']}\n"
+            if item.get('price_range'):
+                response += f"   💰 Giá: {item['price_range']}\n"
+            if item.get('rating'):
+                response += f"   ⭐ Đánh giá: {item['rating']}/5\n"
+            if item.get('specialties'):
+                response += f"   🌟 Đặc sản: {item['specialties']}\n"
+            response += "\n"
         
         elif entity_type == 'activity':
-            response += f"{idx}. {item['name']}\n"
-            response += f"   Loại: {item['type']}\n"
-            response += f"   Giá: {item['price']:,} VNĐ\n"
-            response += f"   Thời gian: {item['duration']}\n\n"
+            response += f"{idx}. 🎯 {item['name']}\n"
+            if item.get('type'):
+                response += f"   🏷️ Loại: {item['type']}\n"
+            if item.get('price'):
+                response += f"   💰 Giá: {item['price']:,} VNĐ\n"
+            if item.get('duration'):
+                response += f"   ⏱️ Thời gian: {item['duration']}\n"
+            if item.get('description'):
+                desc = item['description'][:80] + "..." if len(item['description']) > 80 else item['description']
+                response += f"   📝 {desc}\n"
+            response += "\n"
         
         elif entity_type == 'tour':
-            response += f"{idx}. {item['name']}\n"
-            response += f"   Thời gian: {item['duration_days']} ngày\n"
-            response += f"   Giá: {item['price']:,} VNĐ\n\n"
+            response += f"{idx}. 🎫 {item['name']}\n"
+            if item.get('duration_days'):
+                response += f"   📅 Thời gian: {item['duration_days']} ngày\n"
+            if item.get('price'):
+                response += f"   💰 Giá: {item['price']:,} VNĐ\n"
+            if item.get('destinations'):
+                try:
+                    dests = json.loads(item['destinations']) if isinstance(item['destinations'], str) else item['destinations']
+                    if dests:
+                        response += f"   📍 Điểm đến: {', '.join(dests)}\n"
+                except:
+                    pass
+            response += "\n"
+    
+    if len(results) > 5:
+        response += f"\n... và {len(results) - 5} kết quả khác.\n"
     
     return response
 
@@ -67,38 +118,54 @@ class ActionSearchDestination(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
+        destination = tracker.get_slot("destination")
         province = tracker.get_slot("province")
         region = tracker.get_slot("region")
         category = tracker.get_slot("category")
         
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
+        if not conn:
+            dispatcher.utter_message(text="Xin lỗi, hiện tại hệ thống đang gặp sự cố. Vui lòng thử lại sau.")
+            return []
         
-        query = "SELECT * FROM destinations WHERE 1=1"
-        params = []
-        
-        if province:
-            query += " AND LOWER(province) LIKE LOWER(%s)"
-            params.append(f"%{province}%")
-        
-        if region:
-            query += " AND LOWER(region) LIKE LOWER(%s)"
-            params.append(f"%{region}%")
-        
-        if category:
-            query += " AND LOWER(category) LIKE LOWER(%s)"
-            params.append(f"%{category}%")
-        
-        query += " ORDER BY rating DESC LIMIT 5"
-        
-        cur.execute(query, params)
-        results = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        message = format_results(results, 'destination')
-        dispatcher.utter_message(text=message)
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            query = "SELECT * FROM destinations WHERE 1=1"
+            params = []
+            
+            if destination:
+                query += " AND LOWER(name) LIKE LOWER(%s)"
+                params.append(f"%{destination}%")
+            
+            if province:
+                query += " AND LOWER(province) LIKE LOWER(%s)"
+                params.append(f"%{province}%")
+            
+            if region:
+                query += " AND LOWER(region) LIKE LOWER(%s)"
+                params.append(f"%{region}%")
+            
+            if category:
+                query += " AND LOWER(category) LIKE LOWER(%s)"
+                params.append(f"%{category}%")
+            
+            query += " ORDER BY rating DESC LIMIT 10"
+            
+            cur.execute(query, params)
+            results = cur.fetchall()
+            
+            message = format_results(results, 'destination')
+            dispatcher.utter_message(text=message)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionSearchDestination: {e}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm. Vui lòng thử lại.")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
         return []
 
@@ -114,43 +181,53 @@ class ActionSearchHotel(Action):
         destination = tracker.get_slot("destination")
         star_rating = tracker.get_slot("star_rating")
         price_range = tracker.get_slot("price_range")
+        amenities = tracker.get_slot("amenities")
+        
+        if not destination:
+            dispatcher.utter_message(response="utter_ask_destination")
+            return []
         
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
+        if not conn:
+            dispatcher.utter_message(text="Xin lỗi, hiện tại hệ thống đang gặp sự cố. Vui lòng thử lại sau.")
+            return []
         
-        query = """
-            SELECT h.* FROM hotels h
-            JOIN destinations d ON h.destination_id = d.id
-            WHERE 1=1
-        """
-        params = []
-        
-        if destination:
-            query += " AND LOWER(d.name) LIKE LOWER(%s)"
-            params.append(f"%{destination}%")
-        
-        if star_rating:
-            try:
-                rating_num = int(''.join(filter(str.isdigit, star_rating)))
-                query += " AND h.star_rating = %s"
-                params.append(rating_num)
-            except:
-                pass
-        
-        if price_range:
-            query += " AND LOWER(h.price_range) LIKE LOWER(%s)"
-            params.append(f"%{price_range}%")
-        
-        query += " ORDER BY h.star_rating DESC LIMIT 5"
-        
-        cur.execute(query, params)
-        results = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        message = format_results(results, 'hotel')
-        dispatcher.utter_message(text=message)
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            query = """
+                SELECT h.* FROM hotels h
+                JOIN destinations d ON h.destination_id = d.id
+                WHERE LOWER(d.name) LIKE LOWER(%s)
+            """
+            params = [f"%{destination}%"]
+            
+            if star_rating:
+                rating_num = int(''.join(filter(str.isdigit, str(star_rating))))
+                if rating_num:
+                    query += " AND h.star_rating = %s"
+                    params.append(rating_num)
+            
+            if price_range:
+                query += " AND LOWER(h.price_range) LIKE LOWER(%s)"
+                params.append(f"%{price_range}%")
+            
+            query += " ORDER BY h.star_rating DESC, h.name LIMIT 10"
+            
+            cur.execute(query, params)
+            results = cur.fetchall()
+            
+            message = format_results(results, 'hotel')
+            dispatcher.utter_message(text=message)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionSearchHotel: {e}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm khách sạn. Vui lòng thử lại.")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
         return []
 
@@ -167,38 +244,49 @@ class ActionSearchRestaurant(Action):
         cuisine_type = tracker.get_slot("cuisine_type")
         price_range = tracker.get_slot("price_range")
         
+        if not destination:
+            dispatcher.utter_message(response="utter_ask_destination")
+            return []
+        
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
+        if not conn:
+            dispatcher.utter_message(text="Xin lỗi, hiện tại hệ thống đang gặp sự cố.")
+            return []
         
-        query = """
-            SELECT r.* FROM restaurants r
-            JOIN destinations d ON r.destination_id = d.id
-            WHERE 1=1
-        """
-        params = []
-        
-        if destination:
-            query += " AND LOWER(d.name) LIKE LOWER(%s)"
-            params.append(f"%{destination}%")
-        
-        if cuisine_type:
-            query += " AND LOWER(r.cuisine_type) LIKE LOWER(%s)"
-            params.append(f"%{cuisine_type}%")
-        
-        if price_range:
-            query += " AND LOWER(r.price_range) LIKE LOWER(%s)"
-            params.append(f"%{price_range}%")
-        
-        query += " ORDER BY r.rating DESC LIMIT 5"
-        
-        cur.execute(query, params)
-        results = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        message = format_results(results, 'restaurant')
-        dispatcher.utter_message(text=message)
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            query = """
+                SELECT r.* FROM restaurants r
+                JOIN destinations d ON r.destination_id = d.id
+                WHERE LOWER(d.name) LIKE LOWER(%s)
+            """
+            params = [f"%{destination}%"]
+            
+            if cuisine_type:
+                query += " AND LOWER(r.cuisine_type) LIKE LOWER(%s)"
+                params.append(f"%{cuisine_type}%")
+            
+            if price_range:
+                query += " AND LOWER(r.price_range) LIKE LOWER(%s)"
+                params.append(f"%{price_range}%")
+            
+            query += " ORDER BY r.rating DESC LIMIT 10"
+            
+            cur.execute(query, params)
+            results = cur.fetchall()
+            
+            message = format_results(results, 'restaurant')
+            dispatcher.utter_message(text=message)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionSearchRestaurant: {e}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm nhà hàng.")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
         return []
 
@@ -214,34 +302,45 @@ class ActionSearchActivity(Action):
         destination = tracker.get_slot("destination")
         activity_type = tracker.get_slot("activity_type")
         
+        if not destination:
+            dispatcher.utter_message(response="utter_ask_destination")
+            return []
+        
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
+        if not conn:
+            dispatcher.utter_message(text="Xin lỗi, hiện tại hệ thống đang gặp sự cố.")
+            return []
         
-        query = """
-            SELECT a.* FROM activities a
-            JOIN destinations d ON a.destination_id = d.id
-            WHERE 1=1
-        """
-        params = []
-        
-        if destination:
-            query += " AND LOWER(d.name) LIKE LOWER(%s)"
-            params.append(f"%{destination}%")
-        
-        if activity_type:
-            query += " AND LOWER(a.type) LIKE LOWER(%s)"
-            params.append(f"%{activity_type}%")
-        
-        query += " ORDER BY a.price ASC LIMIT 5"
-        
-        cur.execute(query, params)
-        results = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        message = format_results(results, 'activity')
-        dispatcher.utter_message(text=message)
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            query = """
+                SELECT a.* FROM activities a
+                JOIN destinations d ON a.destination_id = d.id
+                WHERE LOWER(d.name) LIKE LOWER(%s)
+            """
+            params = [f"%{destination}%"]
+            
+            if activity_type:
+                query += " AND LOWER(a.type) LIKE LOWER(%s)"
+                params.append(f"%{activity_type}%")
+            
+            query += " ORDER BY a.price ASC LIMIT 10"
+            
+            cur.execute(query, params)
+            results = cur.fetchall()
+            
+            message = format_results(results, 'activity')
+            dispatcher.utter_message(text=message)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionSearchActivity: {e}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm hoạt động.")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
         return []
 
@@ -259,33 +358,42 @@ class ActionSearchTour(Action):
         price_range = tracker.get_slot("price_range")
         
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
+        if not conn:
+            dispatcher.utter_message(text="Xin lỗi, hiện tại hệ thống đang gặp sự cố.")
+            return []
         
-        query = "SELECT * FROM tours WHERE 1=1"
-        params = []
-        
-        if destination:
-            query += " AND destinations::text LIKE %s"
-            params.append(f"%{destination}%")
-        
-        if duration:
-            try:
-                days = int(''.join(filter(str.isdigit, duration)))
-                query += " AND duration_days = %s"
-                params.append(days)
-            except:
-                pass
-        
-        query += " ORDER BY price ASC LIMIT 5"
-        
-        cur.execute(query, params)
-        results = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        message = format_results(results, 'tour')
-        dispatcher.utter_message(text=message)
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            query = "SELECT * FROM tours WHERE 1=1"
+            params = []
+            
+            if destination:
+                query += " AND destinations::text LIKE %s"
+                params.append(f"%{destination}%")
+            
+            if duration:
+                days = int(''.join(filter(str.isdigit, str(duration))))
+                if days:
+                    query += " AND duration_days = %s"
+                    params.append(days)
+            
+            query += " ORDER BY price ASC LIMIT 10"
+            
+            cur.execute(query, params)
+            results = cur.fetchall()
+            
+            message = format_results(results, 'tour')
+            dispatcher.utter_message(text=message)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionSearchTour: {e}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm tour.")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
         return []
 
@@ -302,43 +410,130 @@ class ActionGetWeather(Action):
         month = tracker.get_slot("month")
         
         if not destination:
-            dispatcher.utter_message(text="Bạn muốn biết thời tiết ở đâu?")
+            dispatcher.utter_message(response="utter_ask_destination")
             return []
         
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        query = """
-            SELECT w.*, d.name as destination_name FROM weather w
-            JOIN destinations d ON w.destination_id = d.id
-            WHERE LOWER(d.name) LIKE LOWER(%s)
-        """
-        params = [f"%{destination}%"]
-        
-        if month:
-            try:
-                month_num = int(''.join(filter(str.isdigit, month)))
-                query += " AND w.month = %s"
-                params.append(month_num)
-            except:
-                pass
-        
-        cur.execute(query, params)
-        results = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        if not results:
-            dispatcher.utter_message(text=f"Xin lỗi, tôi không có thông tin thời tiết cho {destination}.")
+        if not conn:
+            dispatcher.utter_message(text="Xin lỗi, hiện tại hệ thống đang gặp sự cố.")
             return []
         
-        response = f"Thời tiết tại {results[0]['destination_name']}:\n\n"
-        for item in results:
-            response += f"Tháng {item['month']}: {item['description']}, "
-            response += f"nhiệt độ trung bình {item['avg_temp']}°C\n"
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            query = """
+                SELECT w.*, d.name as destination_name 
+                FROM weather w
+                JOIN destinations d ON w.destination_id = d.id
+                WHERE LOWER(d.name) LIKE LOWER(%s)
+            """
+            params = [f"%{destination}%"]
+            
+            if month:
+                month_num = int(''.join(filter(str.isdigit, str(month))))
+                if month_num and 1 <= month_num <= 12:
+                    query += " AND w.month = %s"
+                    params.append(month_num)
+            
+            query += " ORDER BY w.month"
+            
+            cur.execute(query, params)
+            results = cur.fetchall()
+            
+            if not results:
+                dispatcher.utter_message(text=f"Xin lỗi, tôi không có thông tin thời tiết cho {destination}.")
+            else:
+                response = f"🌤️ Thời tiết tại {results[0]['destination_name']}:\n\n"
+                for item in results:
+                    response += f"📅 Tháng {item['month']}: {item['description']}\n"
+                    response += f"   🌡️ Nhiệt độ trung bình: {item['avg_temp']}°C\n\n"
+                
+                dispatcher.utter_message(text=response)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionGetWeather: {e}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi lấy thông tin thời tiết.")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
-        dispatcher.utter_message(text=response)
+        return []
+
+
+class ActionGetBestTime(Action):
+    def name(self) -> Text:
+        return "action_get_best_time"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        destination = tracker.get_slot("destination")
+        
+        if not destination:
+            dispatcher.utter_message(response="utter_best_time_general")
+            return []
+        
+        conn = get_db_connection()
+        if not conn:
+            dispatcher.utter_message(response="utter_best_time_general")
+            return []
+        
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            # Get weather data to determine best time
+            query = """
+                SELECT w.*, d.name as destination_name, d.region
+                FROM weather w
+                JOIN destinations d ON w.destination_id = d.id
+                WHERE LOWER(d.name) LIKE LOWER(%s)
+                ORDER BY w.month
+            """
+            
+            cur.execute(query, [f"%{destination}%"])
+            results = cur.fetchall()
+            
+            if not results:
+                dispatcher.utter_message(response="utter_best_time_general")
+            else:
+                dest_name = results[0]['destination_name']
+                region = results[0].get('region', '')
+                
+                # Recommend based on temperature and description
+                good_months = []
+                for item in results:
+                    temp = item['avg_temp']
+                    desc = item['description'].lower()
+                    # Good weather: 20-30°C, no heavy rain
+                    if 20 <= temp <= 30 and 'mưa' not in desc and 'bão' not in desc:
+                        good_months.append(item['month'])
+                
+                if good_months:
+                    months_str = ", ".join([f"tháng {m}" for m in good_months])
+                    response = f"⭐ Thời điểm tốt nhất đi {dest_name}:\n\n"
+                    response += f"📅 {months_str}\n\n"
+                    response += "Lý do:\n"
+                    response += "• Thời tiết dễ chịu (20-30°C)\n"
+                    response += "• Ít mưa và bão\n"
+                    response += "• Thích hợp cho các hoạt động ngoài trời\n"
+                else:
+                    response = f"📅 Thông tin thời tiết {dest_name} theo tháng:\n\n"
+                    for item in results[:6]:
+                        response += f"Tháng {item['month']}: {item['description']}, {item['avg_temp']}°C\n"
+                
+                dispatcher.utter_message(text=response)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionGetBestTime: {e}")
+            dispatcher.utter_message(response="utter_best_time_general")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
         return []
 
@@ -354,39 +549,56 @@ class ActionGetTransportation(Action):
         from_location = tracker.get_slot("from_location")
         to_location = tracker.get_slot("to_location")
         
-        if not from_location or not to_location:
-            dispatcher.utter_message(text="Bạn muốn đi từ đâu đến đâu?")
+        if not from_location:
+            dispatcher.utter_message(response="utter_ask_from_location")
+            return []
+        
+        if not to_location:
+            dispatcher.utter_message(response="utter_ask_to_location")
             return []
         
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        query = """
-            SELECT t.*, d1.name as from_name, d2.name as to_name 
-            FROM transportation t
-            JOIN destinations d1 ON t.from_destination_id = d1.id
-            JOIN destinations d2 ON t.to_destination_id = d2.id
-            WHERE LOWER(d1.name) LIKE LOWER(%s)
-            AND LOWER(d2.name) LIKE LOWER(%s)
-        """
-        
-        cur.execute(query, [f"%{from_location}%", f"%{to_location}%"])
-        results = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        if not results:
-            dispatcher.utter_message(text=f"Xin lỗi, tôi không tìm thấy thông tin di chuyển từ {from_location} đến {to_location}.")
+        if not conn:
+            dispatcher.utter_message(response="utter_transportation_vietnam")
             return []
         
-        response = f"Các phương tiện từ {results[0]['from_name']} đến {results[0]['to_name']}:\n\n"
-        for item in results:
-            response += f"• {item['type'].capitalize()}: "
-            response += f"Thời gian ~{item['duration']}, "
-            response += f"Giá {item['price_range']}\n"
-        
-        dispatcher.utter_message(text=response)
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            query = """
+                SELECT t.*, d1.name as from_name, d2.name as to_name 
+                FROM transportation t
+                JOIN destinations d1 ON t.from_destination_id = d1.id
+                JOIN destinations d2 ON t.to_destination_id = d2.id
+                WHERE LOWER(d1.name) LIKE LOWER(%s)
+                AND LOWER(d2.name) LIKE LOWER(%s)
+            """
+            
+            cur.execute(query, [f"%{from_location}%", f"%{to_location}%"])
+            results = cur.fetchall()
+            
+            if not results:
+                response = f"Xin lỗi, tôi không tìm thấy thông tin di chuyển từ {from_location} đến {to_location}.\n\n"
+                dispatcher.utter_message(text=response)
+                dispatcher.utter_message(response="utter_transportation_vietnam")
+            else:
+                response = f"🚗 Cách di chuyển từ {results[0]['from_name']} đến {results[0]['to_name']}:\n\n"
+                for idx, item in enumerate(results, 1):
+                    icon = {"máy bay": "✈️", "tàu hỏa": "🚄", "xe khách": "🚌", "taxi": "🚕"}.get(item['type'], "🚗")
+                    response += f"{idx}. {icon} {item['type'].capitalize()}\n"
+                    response += f"   ⏱️ Thời gian: ~{item['duration']}\n"
+                    response += f"   💰 Giá: {item['price_range']}\n\n"
+                
+                dispatcher.utter_message(text=response)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionGetTransportation: {e}")
+            dispatcher.utter_message(response="utter_transportation_vietnam")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
         return []
 
@@ -406,37 +618,52 @@ class ActionGetReviews(Action):
             return []
         
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        # Get destination reviews
-        query = """
-            SELECT r.*, d.name as destination_name 
-            FROM reviews r
-            JOIN destinations d ON r.entity_id = d.id
-            WHERE r.entity_type = 'destination'
-            AND LOWER(d.name) LIKE LOWER(%s)
-            ORDER BY r.created_at DESC
-            LIMIT 5
-        """
-        
-        cur.execute(query, [f"%{destination}%"])
-        results = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        if not results:
-            dispatcher.utter_message(text=f"Chưa có đánh giá về {destination}.")
+        if not conn:
+            dispatcher.utter_message(text="Xin lỗi, hiện tại hệ thống đang gặp sự cố.")
             return []
         
-        avg_rating = sum(r['rating'] for r in results) / len(results)
-        response = f"Đánh giá về {results[0]['destination_name']}:\n"
-        response += f"Điểm trung bình: {avg_rating:.1f}/5 ({len(results)} đánh giá)\n\n"
-        
-        for idx, item in enumerate(results[:3], 1):
-            response += f"{idx}. {item['rating']}/5 - {item['comment'][:100]}...\n"
-        
-        dispatcher.utter_message(text=response)
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            # Get destination reviews
+            query = """
+                SELECT r.*, d.name as destination_name 
+                FROM reviews r
+                JOIN destinations d ON r.entity_id = d.id
+                WHERE r.entity_type = 'destination'
+                AND LOWER(d.name) LIKE LOWER(%s)
+                ORDER BY r.created_at DESC
+                LIMIT 5
+            """
+            
+            cur.execute(query, [f"%{destination}%"])
+            results = cur.fetchall()
+            
+            if not results:
+                dispatcher.utter_message(text=f"Chưa có đánh giá về {destination}.")
+            else:
+                avg_rating = sum(r['rating'] for r in results) / len(results)
+                response = f"⭐ Đánh giá về {results[0]['destination_name']}:\n"
+                response += f"📊 Điểm trung bình: {avg_rating:.1f}/5 ({len(results)} đánh giá)\n\n"
+                
+                for idx, item in enumerate(results[:3], 1):
+                    stars = "⭐" * item['rating']
+                    response += f"{idx}. {stars} ({item['rating']}/5)\n"
+                    if item['comment']:
+                        comment = item['comment'][:100] + "..." if len(item['comment']) > 100 else item['comment']
+                        response += f"   💬 {comment}\n"
+                    response += "\n"
+                
+                dispatcher.utter_message(text=response)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionGetReviews: {e}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi lấy đánh giá.")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
         return []
 
@@ -451,119 +678,106 @@ class ActionRecommendBudget(Action):
         
         destination = tracker.get_slot("destination")
         duration = tracker.get_slot("duration")
+        traveler_count = tracker.get_slot("traveler_count")
         
         if not destination:
             dispatcher.utter_message(text="Bạn muốn đi đâu để tôi tính ngân sách giúp bạn?")
             return []
         
-        # Default duration
+        # Default values
         days = 3
+        people = 1
+        
         if duration:
             try:
-                days = int(''.join(filter(str.isdigit, duration)))
+                days = int(''.join(filter(str.isdigit, str(duration))))
             except:
-                pass
+                days = 3
+        
+        if traveler_count:
+            try:
+                people = int(''.join(filter(str.isdigit, str(traveler_count))))
+            except:
+                people = 1
         
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        # Get average hotel and restaurant prices
-        query = """
-            SELECT 
-                d.name as destination_name,
-                AVG(CASE 
-                    WHEN h.price_range = 'rẻ' THEN 500000
-                    WHEN h.price_range = 'trung bình' THEN 1000000
-                    WHEN h.price_range = 'cao cấp' THEN 2500000
-                    ELSE 1000000
-                END) as avg_hotel_price,
-                AVG(CASE 
-                    WHEN r.price_range = 'rẻ' THEN 100000
-                    WHEN r.price_range = 'trung bình' THEN 250000
-                    WHEN r.price_range = 'cao cấp' THEN 500000
-                    ELSE 200000
-                END) as avg_restaurant_price
-            FROM destinations d
-            LEFT JOIN hotels h ON h.destination_id = d.id
-            LEFT JOIN restaurants r ON r.destination_id = d.id
-            WHERE LOWER(d.name) LIKE LOWER(%s)
-            GROUP BY d.name
-        """
-        
-        cur.execute(query, [f"%{destination}%"])
-        result = cur.fetchone()
-        
-        cur.close()
-        conn.close()
-        
-        if not result:
-            dispatcher.utter_message(text=f"Xin lỗi, tôi không có đủ thông tin về {destination} để tính ngân sách.")
+        if not conn:
+            dispatcher.utter_message(response="utter_budget_ranges")
             return []
         
-        hotel_per_night = result['avg_hotel_price'] or 1000000
-        food_per_day = (result['avg_restaurant_price'] or 200000) * 3  # 3 meals
-        activities_per_day = 300000
-        transport = 500000
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            # Get average prices
+            query = """
+                SELECT 
+                    d.name as destination_name,
+                    AVG(CASE 
+                        WHEN h.price_range LIKE '%rẻ%' THEN 500000
+                        WHEN h.price_range LIKE '%trung bình%' THEN 1000000
+                        WHEN h.price_range LIKE '%cao cấp%' THEN 2500000
+                        ELSE 1000000
+                    END) as avg_hotel_price,
+                    AVG(CASE 
+                        WHEN r.price_range LIKE '%rẻ%' THEN 100000
+                        WHEN r.price_range LIKE '%trung bình%' THEN 250000
+                        WHEN r.price_range LIKE '%cao cấp%' THEN 500000
+                        ELSE 200000
+                    END) as avg_restaurant_price
+                FROM destinations d
+                LEFT JOIN hotels h ON h.destination_id = d.id
+                LEFT JOIN restaurants r ON r.destination_id = d.id
+                WHERE LOWER(d.name) LIKE LOWER(%s)
+                GROUP BY d.name
+            """
+            
+            cur.execute(query, [f"%{destination}%"])
+            result = cur.fetchone()
+            
+            if not result:
+                dispatcher.utter_message(response="utter_budget_ranges")
+                return []
+            
+            hotel_per_night = result['avg_hotel_price'] or 1000000
+            food_per_day = (result['avg_restaurant_price'] or 200000) * 3
+            activities_per_day = 300000
+            transport = 500000
+            
+            # Calculate per person
+            hotel_total = hotel_per_night * days
+            food_total = food_per_day * days
+            activities_total = activities_per_day * days
+            
+            # Some costs are shared
+            per_person = (hotel_total + food_total + activities_total + transport) / people if people > 1 else (hotel_total + food_total + activities_total + transport)
+            total_group = per_person * people
+            
+            response = f"💰 Ngân sách dự kiến cho chuyến đi {result['destination_name']}:\n\n"
+            response += f"👥 Số người: {people}\n"
+            response += f"📅 Thời gian: {days} ngày\n\n"
+            response += f"Chi phí cho 1 người:\n"
+            response += f"• 🏨 Khách sạn: {hotel_total/people if people > 1 else hotel_total:,.0f} VNĐ ({hotel_per_night:,.0f} VNĐ/đêm)\n"
+            response += f"• 🍜 Ăn uống: {food_total:,.0f} VNĐ ({food_per_day:,.0f} VNĐ/ngày)\n"
+            response += f"• 🎯 Hoạt động: {activities_total:,.0f} VNĐ ({activities_per_day:,.0f} VNĐ/ngày)\n"
+            response += f"• 🚗 Di chuyển: {transport/people if people > 1 else transport:,.0f} VNĐ\n\n"
+            response += f"💵 Tổng/người: {per_person:,.0f} VNĐ\n"
+            
+            if people > 1:
+                response += f"💵 Tổng cả nhóm: {total_group:,.0f} VNĐ\n"
+            
+            response += f"\n📝 Lưu ý: Chưa bao gồm vé máy bay và mua sắm cá nhân"
+            
+            dispatcher.utter_message(text=response)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionRecommendBudget: {e}")
+            dispatcher.utter_message(response="utter_budget_ranges")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
-        total_budget = (hotel_per_night * days) + (food_per_day * days) + (activities_per_day * days) + transport
-        
-        response = f"Ngân sách dự kiến cho chuyến đi {result['destination_name']} ({days} ngày):\n\n"
-        response += f"• Khách sạn: {hotel_per_night:,} VNĐ/đêm × {days} đêm = {hotel_per_night * days:,} VNĐ\n"
-        response += f"• Ăn uống: {food_per_day:,} VNĐ/ngày × {days} ngày = {food_per_day * days:,} VNĐ\n"
-        response += f"• Hoạt động/Tham quan: {activities_per_day:,} VNĐ/ngày × {days} ngày = {activities_per_day * days:,} VNĐ\n"
-        response += f"• Di chuyển: {transport:,} VNĐ\n"
-        response += f"\n💰 Tổng cộng: {total_budget:,} VNĐ\n"
-        response += f"(Ước tính cho 1 người, chưa bao gồm vé máy bay)\n"
-        
-        dispatcher.utter_message(text=response)
-        
-        return []
-    
-class ActionGetBestTime(Action):
-    def name(self) -> Text:
-        return "action_get_best_time"
-
-    def run(self, dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        
-        destination = tracker.get_slot("destination")
-        
-        if not destination:
-            dispatcher.utter_message(text="Bạn muốn biết thời điểm tốt nhất để đi đâu?")
-            return []
-        
-        conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        query = """
-            SELECT d.name, d.best_time_to_visit, w.month, w.description
-            FROM destinations d
-            LEFT JOIN weather w ON w.destination_id = d.id
-            WHERE LOWER(d.name) LIKE LOWER(%s)
-            AND w.is_best_time = true
-            ORDER BY w.month
-        """
-        
-        cur.execute(query, [f"%{destination}%"])
-        results = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        if not results:
-            dispatcher.utter_message(text=f"Xin lỗi, tôi không có thông tin về thời điểm tốt nhất để đi {destination}.")
-            return []
-        
-        response = f"Thời điểm tốt nhất để đi {results[0]['name']}:\n\n"
-        response += f"📅 {results[0]['best_time_to_visit']}\n\n"
-        
-        if len(results) > 0:
-            response += "Chi tiết:\n"
-            for item in results:
-                response += f"• Tháng {item['month']}: {item['description']}\n"
-        
-        dispatcher.utter_message(text=response)
         return []
 
 
@@ -575,44 +789,75 @@ class ActionCompareDestinations(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
-        # Get all destination entities from the latest message
+        # Get all destination entities from the message
         entities = tracker.latest_message.get('entities', [])
         destinations = [e['value'] for e in entities if e['entity'] == 'destination']
         
         if len(destinations) < 2:
-            dispatcher.utter_message(text="Bạn muốn so sánh những địa điểm nào? Vui lòng cho tôi biết ít nhất 2 địa điểm.")
+            dispatcher.utter_message(text="Bạn muốn so sánh điểm đến nào? Vui lòng cho tôi biết 2 địa điểm.")
             return []
+        
+        dest1, dest2 = destinations[0], destinations[1]
         
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        query = """
-            SELECT name, province, category, rating, description, best_time_to_visit
-            FROM destinations
-            WHERE LOWER(name) LIKE LOWER(%s) OR LOWER(name) LIKE LOWER(%s)
-            ORDER BY rating DESC
-        """
-        
-        cur.execute(query, [f"%{destinations[0]}%", f"%{destinations[1]}%"])
-        results = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        if len(results) < 2:
-            dispatcher.utter_message(text="Xin lỗi, tôi không tìm thấy đủ thông tin để so sánh.")
+        if not conn:
+            dispatcher.utter_message(text="Xin lỗi, hiện tại hệ thống đang gặp sự cố.")
             return []
         
-        response = f"So sánh giữa {results[0]['name']} và {results[1]['name']}:\n\n"
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            query = "SELECT * FROM destinations WHERE LOWER(name) LIKE LOWER(%s)"
+            
+            cur.execute(query, [f"%{dest1}%"])
+            result1 = cur.fetchone()
+            
+            cur.execute(query, [f"%{dest2}%"])
+            result2 = cur.fetchone()
+            
+            if not result1 or not result2:
+                dispatcher.utter_message(text="Xin lỗi, tôi không tìm thấy thông tin về một trong hai điểm đến này.")
+                return []
+            
+            response = f"📊 So sánh {result1['name']} vs {result2['name']}:\n\n"
+            
+            response += f"📍 {result1['name']}:\n"
+            response += f"   • Vị trí: {result1['province']}, {result1['region']}\n"
+            response += f"   • Loại: {result1['category']}\n"
+            response += f"   • Đánh giá: {result1['rating']}/5\n"
+            if result1.get('description'):
+                desc = result1['description'][:100] + "..."
+                response += f"   • Mô tả: {desc}\n"
+            response += "\n"
+            
+            response += f"📍 {result2['name']}:\n"
+            response += f"   • Vị trí: {result2['province']}, {result2['region']}\n"
+            response += f"   • Loại: {result2['category']}\n"
+            response += f"   • Đánh giá: {result2['rating']}/5\n"
+            if result2.get('description'):
+                desc = result2['description'][:100] + "..."
+                response += f"   • Mô tả: {desc}\n"
+            response += "\n"
+            
+            # Simple comparison
+            if result1['rating'] > result2['rating']:
+                response += f"⭐ {result1['name']} có đánh giá cao hơn\n"
+            elif result2['rating'] > result1['rating']:
+                response += f"⭐ {result2['name']} có đánh giá cao hơn\n"
+            else:
+                response += f"⭐ Cả hai đều có đánh giá tương đương\n"
+            
+            dispatcher.utter_message(text=response)
+            
+        except Exception as e:
+            logger.error(f"Error in ActionCompareDestinations: {e}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi so sánh.")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
-        for idx, dest in enumerate(results[:2], 1):
-            response += f"{idx}. {dest['name']} ({dest['province']})\n"
-            response += f"   • Loại: {dest['category']}\n"
-            response += f"   • Đánh giá: {dest['rating']}/5\n"
-            response += f"   • Thời điểm tốt nhất: {dest['best_time_to_visit']}\n"
-            response += f"   • Mô tả: {dest['description'][:100]}...\n\n"
-        
-        dispatcher.utter_message(text=response)
         return []
 
 
@@ -625,32 +870,20 @@ class ActionGetTravelTips(Action):
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
         destination = tracker.get_slot("destination")
-        traveler_type = tracker.get_slot("traveler_type")
-        
-        tips = "🎒 Mẹo du lịch hữu ích:\n\n"
-        
-        if traveler_type and "nữ" in traveler_type.lower():
-            tips += "👩 Dành cho nữ du khách:\n"
-            tips += "• Chia sẻ lịch trình với người thân\n"
-            tips += "• Tránh đi về khuya một mình\n"
-            tips += "• Giữ liên lạc thường xuyên\n"
-            tips += "• Chọn nơi ở có đánh giá tốt về an toàn\n\n"
-        
-        tips += "💡 Mẹo chung:\n"
-        tips += "• Mua bảo hiểm du lịch\n"
-        tips += "• Sao lưu giấy tờ quan trọng\n"
-        tips += "• Mang theo thuốc cần thiết\n"
-        tips += "• Học vài câu tiếng Việt cơ bản\n"
-        tips += "• Tải bản đồ offline\n"
-        tips += "• Mang theo tiền mặt (nhiều nơi chưa nhận thẻ)\n"
         
         if destination:
-            tips += f"\n📍 Đặc biệt cho {destination}:\n"
-            tips += "• Kiểm tra thời tiết trước khi đi\n"
-            tips += "• Đặt chỗ trước trong mùa cao điểm\n"
-            tips += "• Tìm hiểu phong tục địa phương\n"
+            response = f"💡 Tips du lịch {destination}:\n\n"
+            response += "• Đổi tiền tại ngân hàng hoặc ATM chính thức\n"
+            response += "• Mua sim 4G tại sân bay để dùng bản đồ\n"
+            response += "• Sử dụng Grab/Be thay vì taxi truyền thống\n"
+            response += "• Thương lượng giá khi mua sắm ở chợ\n"
+            response += "• Mang theo thuốc cá nhân và kem chống nắng\n"
+            response += "• Ăn thử đặc sản địa phương\n"
+            response += "• Tôn trọng văn hóa và phong tục địa phương\n"
+            dispatcher.utter_message(text=response)
+        else:
+            dispatcher.utter_message(response="utter_travel_tips_general")
         
-        dispatcher.utter_message(text=tips)
         return []
 
 
@@ -662,21 +895,7 @@ class ActionGetTravelDocuments(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
-        response = "📋 Giấy tờ cần thiết khi du lịch trong nước:\n\n"
-        response += "✅ Bắt buộc:\n"
-        response += "• CMND/CCCD hoặc Hộ chiếu\n"
-        response += "• Giấy khai sinh (cho trẻ em dưới 14 tuổi)\n\n"
-        response += "📝 Nên mang theo:\n"
-        response += "• Bảo hiểm y tế\n"
-        response += "• Bảo hiểm du lịch (nếu có)\n"
-        response += "• Thẻ ATM/tín dụng\n"
-        response += "• Sổ tiêm chủng (nếu có yêu cầu)\n\n"
-        response += "💳 Thanh toán:\n"
-        response += "• Tiền mặt (VNĐ)\n"
-        response += "• Thẻ ngân hàng\n"
-        response += "• Ví điện tử (MoMo, ZaloPay, ...)\n"
-        
-        dispatcher.utter_message(text=response)
+        dispatcher.utter_message(response="utter_visa_info")
         return []
 
 
@@ -689,25 +908,41 @@ class ActionGetSpecialRequirements(Action):
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
         special_need = tracker.get_slot("special_need")
+        diet = tracker.get_slot("diet")
+        traveler_type = tracker.get_slot("traveler_type")
         
-        response = "♿ Hỗ trợ cho du khách có nhu cầu đặc biệt:\n\n"
+        response = "🎯 Thông tin cho nhu cầu đặc biệt:\n\n"
         
-        if special_need and "khuyết tật" in special_need.lower():
-            response += "🦽 Dành cho người khuyết tật:\n"
-            response += "• Tìm khách sạn có thang máy và phòng tiếp cận\n"
-            response += "• Liên hệ trước về xe di chuyển phù hợp\n"
-            response += "• Chọn điểm tham quan có đường dốc/thang máy\n"
-            response += "• Mang theo giấy tờ y tế và thuốc cần thiết\n\n"
+        if special_need and "khuyết tật" in str(special_need).lower():
+            response += "♿ Người khuyết tật:\n"
+            response += "• Chọn khách sạn có thang máy và phòng tiện nghi\n"
+            response += "• Liên hệ trước với nhà hàng về khả năng tiếp cận\n"
+            response += "• Sử dụng dịch vụ xe riêng thay vì phương tiện công cộng\n"
+            response += "• Các điểm tham quan lớn thường có hỗ trợ\n\n"
         
-        response += "👴 Người cao tuổi:\n"
-        response += "• Chọn tour nhịp độ chậm\n"
-        response += "• Nghỉ ngơi đầy đủ\n"
-        response += "• Mang thuốc thường dùng\n\n"
+        if diet and "chay" in str(diet).lower():
+            response += "🥗 Người ăn chay:\n"
+            response += "• Việt Nam có nhiều chùa phục vụ đồ chay\n"
+            response += "• Tìm nhà hàng chay (com chay) ở mọi thành phố\n"
+            response += "• Nói rõ 'ăn chay' hoặc 'không thịt cá' khi gọi món\n\n"
         
-        response += "👶 Trẻ em:\n"
-        response += "• Chuẩn bị đồ chơi, đồ ăn vặt\n"
-        response += "• Chọn nơi ở thân thiện với trẻ em\n"
-        response += "• Lên kế hoạch linh hoạt\n"
+        if traveler_type:
+            if "người già" in str(traveler_type).lower() or "cao tuổi" in str(traveler_type).lower():
+                response += "👴👵 Người cao tuổi:\n"
+                response += "• Chọn tour nhẹ nhàng, ít leo trèo\n"
+                response += "• Đặt khách sạn ở vị trí thuận tiện\n"
+                response += "• Mang theo thuốc thường dùng\n"
+                response += "• Tránh di chuyển quá nhiều trong ngày\n\n"
+            
+            elif "em bé" in str(traveler_type).lower() or "trẻ em" in str(traveler_type).lower():
+                response += "👶 Trẻ em:\n"
+                response += "• Chọn khách sạn có kids club\n"
+                response += "• Mang theo đồ chơi và sách\n"
+                response += "• Lên lịch nghỉ ngơi hợp lý\n"
+                response += "• Chuẩn bị đồ ăn vặt và thuốc cơ bản\n\n"
+        
+        if response == "🎯 Thông tin cho nhu cầu đặc biệt:\n\n":
+            response = "Bạn có nhu cầu đặc biệt gì? Tôi có thể tư vấn cho người khuyết tật, người ăn chay, người cao tuổi, trẻ em..."
         
         dispatcher.utter_message(text=response)
         return []
@@ -722,47 +957,48 @@ class ActionGetPackingList(Action):
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
         destination = tracker.get_slot("destination")
+        category = tracker.get_slot("category")
         season = tracker.get_slot("season")
         
         response = "🎒 Danh sách đồ cần mang:\n\n"
-        response += "👕 Quần áo:\n"
         
-        if season and "đông" in season.lower():
-            response += "• Áo khoác ấm, áo len\n"
-            response += "• Quần dài\n"
-            response += "• Khăn quàng cổ, găng tay\n"
-        elif season and "hè" in season.lower():
-            response += "• Quần áo mỏng, thoáng mát\n"
-            response += "• Áo tắm\n"
-            response += "• Nón/mũ chống nắng\n"
-        else:
-            response += "• Quần áo phù hợp thời tiết\n"
-            response += "• Áo khoác nhẹ\n"
+        # Base items
+        response += "📋 Đồ cơ bản:\n"
+        response += "• Giấy tờ tùy thân (CMND/Passport)\n"
+        response += "• Tiền mặt và thẻ ngân hàng\n"
+        response += "• Điện thoại, sạc, pin dự phòng\n"
+        response += "• Thuốc cá nhân\n\n"
         
-        response += "\n🔋 Đồ dùng:\n"
-        response += "• Sạc điện thoại, pin dự phòng\n"
-        response += "• Thuốc cá nhân\n"
-        response += "• Kem chống nắng\n"
-        response += "• Đồ vệ sinh cá nhân\n"
-        response += "• Túi đựng rác\n\n"
+        # Category specific
+        if category:
+            if "biển" in str(category).lower():
+                response += "🏖️ Đi biển:\n"
+                response += "• Đồ bơi, khăn tắm\n"
+                response += "• Kem chống nắng SPF50+\n"
+                response += "• Mũ, kính râm\n"
+                response += "• Dép đi biển\n"
+                response += "• Túi chống nước cho điện thoại\n\n"
+            
+            elif "núi" in str(category).lower():
+                response += "⛰️ Đi núi:\n"
+                response += "• Giày trekking tốt\n"
+                response += "• Áo khoác ấm (núi lạnh)\n"
+                response += "• Mũ/nón chống nắng\n"
+                response += "• Ba lô chắc chắn\n"
+                response += "• Đèn pin/headlamp\n\n"
         
-        response += "📱 Công nghệ:\n"
-        response += "• Điện thoại + sạc\n"
-        response += "• Camera (nếu có)\n"
-        response += "• Tai nghe\n"
-        
-        if destination:
-            if "biển" in destination.lower() or "nha trang" in destination.lower() or "phú quốc" in destination.lower():
-                response += "\n🏖️ Đặc biệt cho du lịch biển:\n"
-                response += "• Đồ bơi\n"
-                response += "• Kính bơi\n"
-                response += "• Dép lào\n"
-                response += "• Túi chống nước\n"
-            elif "sapa" in destination.lower() or "đà lạt" in destination.lower():
-                response += "\n⛰️ Đặc biệt cho du lịch núi:\n"
-                response += "• Giày trekking\n"
-                response += "• Áo ấm\n"
-                response += "• Đèn pin\n"
+        # Season specific
+        if season:
+            if "đông" in str(season).lower() or "lạnh" in str(season).lower():
+                response += "❄️ Mùa đông:\n"
+                response += "• Áo khoác dày, áo len\n"
+                response += "• Khăn choàng, găng tay\n"
+                response += "• Quần dài ấm\n\n"
+            elif "hè" in str(season).lower() or "nóng" in str(season).lower():
+                response += "☀️ Mùa hè:\n"
+                response += "• Quần áo mỏng, thoáng mát\n"
+                response += "• Kem chống nắng\n"
+                response += "• Mũ/nón rộng vành\n\n"
         
         dispatcher.utter_message(text=response)
         return []
@@ -778,43 +1014,30 @@ class ActionGetLocalCulture(Action):
         
         destination = tracker.get_slot("destination")
         
-        if not destination:
-            dispatcher.utter_message(text="Bạn muốn tìm hiểu văn hóa của địa phương nào?")
-            return []
+        response = "🏛️ Văn hóa và phong tục Việt Nam:\n\n"
         
-        response = f"🏮 Văn hóa địa phương tại {destination}:\n\n"
+        response += "👋 Lời chào:\n"
+        response += "• Chào hỏi lịch sự khi gặp người\n"
+        response += "• Cúi đầu nhẹ thể hiện tôn trọng\n\n"
         
-        # General Vietnamese culture
-        response += "🙏 Phong tục chung:\n"
-        response += "• Chào hỏi lịch sự\n"
-        response += "• Cởi giày khi vào nhà\n"
-        response += "• Ăn uống bằng đũa\n"
-        response += "• Tôn trọng người lớn tuổi\n\n"
+        response += "🙏 Khi vào chùa/đền:\n"
+        response += "• Mặc quần áo kín đáo\n"
+        response += "• Cởi giày trước khi vào\n"
+        response += "• Không ồn ào, giữ yên lặng\n"
+        response += "• Xin phép trước khi chụp ảnh\n\n"
         
-        # Specific destinations
-        if "huế" in destination.lower():
-            response += "👑 Đặc trưng Huế:\n"
-            response += "• Kinh đô cổ\n"
-            response += "• Ẩm thực cung đình\n"
-            response += "• Nhã nhạc cung đình\n"
-            response += "• Lễ hội truyền thống\n"
-        elif "hội an" in destination.lower():
-            response += "🏮 Đặc trưng Hội An:\n"
-            response += "• Phố cổ\n"
-            response += "• Lồng đèn\n"
-            response += "• May đo áo dài\n"
-            response += "• Ẩm thực đa văn hóa\n"
-        elif "sài gòn" in destination.lower() or "tp hcm" in destination.lower():
-            response += "🌆 Đặc trưng Sài Gòn:\n"
-            response += "• Nhịp sống năng động\n"
-            response += "• Văn hóa cà phê\n"
-            response += "• Ẩm thực đường phố\n"
-            response += "• Đa dạng văn hóa\n"
-        else:
-            response += "🎭 Hoạt động văn hóa:\n"
-            response += "• Tham quan di tích lịch sử\n"
-            response += "• Thưởng thức ẩm thực địa phương\n"
-            response += "• Tìm hiểu nghề thủ công truyền thống\n"
+        response += "🍜 Ăn uống:\n"
+        response += "• Dùng đũa khi ăn\n"
+        response += "• Có thể húp phở ầm ĩ (bình thường)\n"
+        response += "• Tip không bắt buộc nhưng được hoan nghênh\n\n"
+        
+        response += "🎁 Quà lưu niệm:\n"
+        response += "• Thương lượng giá ở chợ\n"
+        response += "• Mua tại cửa hàng cố định có giá rõ ràng\n"
+        response += "• Đặc sản: cà phê, trà, tranh, áo dài\n\n"
+        
+        if destination:
+            response += f"📍 {destination} có các lễ hội và đặc sản riêng, bạn có thể hỏi người dân địa phương!"
         
         dispatcher.utter_message(text=response)
         return []
@@ -831,39 +1054,45 @@ class ActionGetPhotographySpots(Action):
         destination = tracker.get_slot("destination")
         
         if not destination:
-            dispatcher.utter_message(text="Bạn muốn tìm địa điểm chụp ảnh ở đâu?")
+            dispatcher.utter_message(response="utter_top_beaches")
             return []
         
-        response = f"📸 Địa điểm chụp ảnh đẹp tại {destination}:\n\n"
+        # Common photography tips
+        response = f"📸 Địa điểm chụp ảnh đẹp:\n\n"
+        response += "💡 Tips chụp ảnh:\n"
+        response += "• Golden hour: 6-8h sáng, 16-18h chiều\n"
+        response += "• Tránh chụp giữa trưa (ánh sáng gắt)\n"
+        response += "• Dậy sớm để tránh đông người\n"
+        response += "• Xin phép trước khi chụp người dân\n\n"
         
-        if "hội an" in destination.lower():
-            response += "1. Phố cổ Hội An (golden hour)\n"
-            response += "2. Cầu Nhật Bản\n"
-            response += "3. Cửa Đại beach\n"
-            response += "4. Ruộng rau Trà Quế\n"
-            response += "5. Chùa Cầu về đêm\n"
-        elif "đà nẵng" in destination.lower():
-            response += "1. Cầu Rồng\n"
-            response += "2. Bà Nà Hills\n"
-            response += "3. Bán đảo Sơn Trà\n"
-            response += "4. Ngũ Hành Sơn\n"
-            response += "5. Bãi biển Mỹ Khê\n"
-        elif "đà lạt" in destination.lower():
-            response += "1. Hồ Tuyền Lâm\n"
-            response += "2. Ga Đà Lạt\n"
-            response += "3. Đồi chè Cầu Đất\n"
-            response += "4. Thiền viện Trúc Lâm\n"
-            response += "5. Thác Datanla\n"
+        # Destination-specific spots (you can expand this)
+        dest_lower = destination.lower()
+        if "đà nẵng" in dest_lower:
+            response += "📍 Đà Nẵng:\n"
+            response += "• Cầu Vàng (Golden Bridge)\n"
+            response += "• Bãi biển Mỹ Khê lúc hoàng hôn\n"
+            response += "• Bán đảo Sơn Trà\n"
+            response += "• Cầu Rồng (tối thứ 7, CN)\n"
+        elif "hội an" in dest_lower:
+            response += "📍 Hội An:\n"
+            response += "• Phố cổ về đêm (đèn lồng)\n"
+            response += "• Cầu Nhật Bản\n"
+            response += "• Bến Thuyền An Hội\n"
+            response += "• Ruộng rau Trà Quế\n"
+        elif "đà lạt" in dest_lower:
+            response += "📍 Đà Lạt:\n"
+            response += "• Đồi chè Cầu Đất\n"
+            response += "• Hồ Tuyền Lâm\n"
+            response += "• Ga Đà Lạt\n"
+            response += "• Đường Hầm Đất Sét\n"
+        elif "sapa" in dest_lower:
+            response += "📍 Sapa:\n"
+            response += "• Ruộng bậc thang (mùa nước đổ)\n"
+            response += "• Đỉnh Fansipan\n"
+            response += "• Bản Cát Cát\n"
+            response += "• Thung lũng Mường Hoa\n"
         else:
-            response += "• Tìm kiếm địa danh nổi tiếng\n"
-            response += "• Chụp lúc bình minh/hoàng hôn\n"
-            response += "• Khám phá góc ảnh độc đáo\n"
-            response += "• Tương tác với người dân địa phương\n"
-        
-        response += "\n💡 Tips:\n"
-        response += "• Chụp vào golden hour (sáng sớm/chiều tà)\n"
-        response += "• Tôn trọng nơi công cộng\n"
-        response += "• Xin phép trước khi chụp người\n"
+            response += f"📍 Hãy hỏi người dân địa phương về các điểm chụp ảnh đẹp tại {destination}!"
         
         dispatcher.utter_message(text=response)
         return []
@@ -879,40 +1108,42 @@ class ActionGetNightlife(Action):
         
         destination = tracker.get_slot("destination")
         
-        if not destination:
-            dispatcher.utter_message(text="Bạn muốn tìm hiểu về nightlife ở đâu?")
-            return []
+        response = "🌃 Hoạt động về đêm:\n\n"
         
-        response = f"🌃 Nightlife tại {destination}:\n\n"
+        dest_lower = str(destination).lower() if destination else ""
         
-        if "sài gòn" in destination.lower() or "tp hcm" in destination.lower():
-            response += "🍺 Bar/Pub:\n"
+        if "sài gòn" in dest_lower or "hcm" in dest_lower:
+            response += "📍 Sài Gòn:\n"
+            response += "• Phố đi bộ Nguyễn Huệ\n"
             response += "• Bùi Viện (backpacker street)\n"
-            response += "• Đường Nguyễn Huệ\n"
-            response += "• Khu Thảo Điền\n\n"
-            response += "🎵 Club/Disco:\n"
-            response += "• Khu vực Q1, Q2\n"
-            response += "• Rooftop bars\n"
-        elif "hà nội" in destination.lower():
-            response += "🍺 Khu vui chơi:\n"
-            response += "• Phố Tạ Hiện\n"
-            response += "• Phố cổ Hà Nội\n"
-            response += "• Khu Trúc Bạch\n"
-        elif "đà nẵng" in destination.lower():
-            response += "🌊 Ven biển:\n"
-            response += "• Mỹ Khê beach bars\n"
-            response += "• Cầu Rồng về đêm\n"
-            response += "• Phố Tây An Thượng\n"
+            response += "• Rooftop bars: Chill Skybar, Social Club\n"
+            response += "• Chợ đêm Bến Thành\n"
+        elif "hà nội" in dest_lower:
+            response += "📍 Hà Nội:\n"
+            response += "• Phố cổ: Tạ Hiện, Mã Mây\n"
+            response += "• Hồ Gươm về đêm\n"
+            response += "• Chợ đêm cuối tuần (phố cổ)\n"
+            response += "• Bia hơi Tạ Hiện\n"
+        elif "đà nẵng" in dest_lower:
+            response += "📍 Đà Nẵng:\n"
+            response += "• Chợ đêm Sơn Trà\n"
+            response += "• Cầu Rồng phun lửa (T7, CN 21h)\n"
+            response += "• Sky36 Bar (tầng 36 Novotel)\n"
+            response += "• Đi dạo bờ biển Mỹ Khê\n"
+        elif "nha trang" in dest_lower:
+            response += "📍 Nha Trang:\n"
+            response += "• Chợ đêm Nha Trang\n"
+            response += "• Sailing Club (beach bar)\n"
+            response += "• Louisiane Brewhouse\n"
+            response += "• Đi dạo công viên biển\n"
         else:
-            response += "🌙 Hoạt động buổi tối:\n"
-            response += "• Dạo chợ đêm\n"
-            response += "• Thưởng thức ẩm thực đường phố\n"
-            response += "• Tản bộ quanh thành phố\n"
+            response += "🎭 Hoạt động về đêm phổ biến:\n"
+            response += "• Chợ đêm địa phương\n"
+            response += "• Phố đi bộ\n"
+            response += "• Quán bia, cafe\n"
+            response += "• Ăn vặt đường phố\n"
         
-        response += "\n⚠️ Lưu ý:\n"
-        response += "• Giữ đồ cẩn thận\n"
-        response += "• Không uống quá mức\n"
-        response += "• Đi nhóm an toàn hơn\n"
+        response += "\n⚠️ Lưu ý: Giữ tài sản cẩn thận, về sớm nếu đi một mình"
         
         dispatcher.utter_message(text=response)
         return []
@@ -928,42 +1159,34 @@ class ActionGetFamilyActivities(Action):
         
         destination = tracker.get_slot("destination")
         
-        if not destination:
-            dispatcher.utter_message(text="Bạn muốn tìm hoạt động cho gia đình ở đâu?")
-            return []
+        response = "👨‍👩‍👧‍👦 Hoạt động cho gia đình:\n\n"
         
-        response = f"👨‍👩‍👧‍👦 Hoạt động cho gia đình tại {destination}:\n\n"
+        response += "🎯 Gợi ý chung:\n"
+        response += "• Công viên nước, công viên giải trí\n"
+        response += "• Bảo tàng tương tác cho trẻ em\n"
+        response += "• Tham quan vườn thú, thủy cung\n"
+        response += "• Hoạt động ngoài trời nhẹ nhàng\n"
+        response += "• Ăn tối ở nhà hàng thân thiện trẻ em\n\n"
         
-        if "đà nẵng" in destination.lower():
-            response += "1. Asia Park (công viên giải trí)\n"
-            response += "2. Bà Nà Hills\n"
-            response += "3. Bảo tàng 3D\n"
-            response += "4. Bãi biển Mỹ Khê\n"
-            response += "5. Ngũ Hành Sơn\n"
-        elif "nha trang" in destination.lower():
-            response += "1. Vinpearl Land\n"
-            response += "2. Thủy cung Trí Nguyên\n"
-            response += "3. Đảo Hòn Mun\n"
-            response += "4. Tắm bùn I-Resort\n"
-            response += "5. Công viên Biển Đông\n"
-        elif "phú quốc" in destination.lower():
-            response += "1. VinWonders Phú Quốc\n"
-            response += "2. Safari Phú Quốc\n"
-            response += "3. Bãi Sao\n"
-            response += "4. Grand World\n"
-            response += "5. Sunset Sanato Beach Club\n"
-        else:
-            response += "🎯 Gợi ý:\n"
-            response += "• Công viên giải trí\n"
-            response += "• Bảo tàng\n"
-            response += "• Vườn thú\n"
-            response += "• Bãi biển\n"
-            response += "• Hoạt động ngoài trời\n"
+        if destination:
+            dest_lower = str(destination).lower()
+            if "đà nẵng" in dest_lower:
+                response += "📍 Đà Nẵng:\n"
+                response += "• Asia Park (công viên giải trí)\n"
+                response += "• Bãi biển Mỹ Khê (an toàn)\n"
+                response += "• Bảo tàng Chăm\n"
+            elif "nha trang" in dest_lower:
+                response += "📍 Nha Trang:\n"
+                response += "• Vinpearl Land\n"
+                response += "• Thủy cung Trí Nguyên\n"
+                response += "• Tắm biển\n"
+            elif "sài gòn" in dest_lower or "hcm" in dest_lower:
+                response += "📍 Sài Gòn:\n"
+                response += "• Thảo Cầm Viên (Sở thú)\n"
+                response += "• Dam Sen Park\n"
+                response += "• KizCiti (thành phố trẻ em)\n"
         
-        response += "\n💡 Tips:\n"
-        response += "• Lên kế hoạch linh hoạt\n"
-        response += "• Mang đồ ăn vặt cho trẻ\n"
-        response += "• Nghỉ ngơi đầy đủ\n"
+        response += "\n💡 Tip: Lên lịch nghỉ ngơi giữa ngày cho trẻ"
         
         dispatcher.utter_message(text=response)
         return []
@@ -979,41 +1202,44 @@ class ActionGetAdventureActivities(Action):
         
         destination = tracker.get_slot("destination")
         
-        if not destination:
-            dispatcher.utter_message(text="Bạn muốn tìm hoạt động mạo hiểm ở đâu?")
-            return []
+        response = "🏔️ Hoạt động mạo hiểm:\n\n"
         
-        response = f"🏃 Hoạt động mạo hiểm tại {destination}:\n\n"
-        
-        if "đà lạt" in destination.lower():
-            response += "1. Canyoning\n"
-            response += "2. Zipline\n"
-            response += "3. Trekking\n"
-            response += "4. Đua xe ATV\n"
-            response += "5. Paragliding\n"
-        elif "nha trang" in destination.lower():
-            response += "1. Lặn biển\n"
-            response += "2. Lướt ván\n"
-            response += "3. Dù lượn trên biển\n"
-            response += "4. Jet ski\n"
-            response += "5. Flyboard\n"
-        elif "sapa" in destination.lower():
-            response += "1. Trekking Fansipan\n"
-            response += "2. Chinh phục đỉnh núi\n"
-            response += "3. Đi xe máy qua đèo\n"
-            response += "4. Cắm trại\n"
+        if destination:
+            dest_lower = str(destination).lower()
+            if "đà lạt" in dest_lower:
+                response += "📍 Đà Lạt:\n"
+                response += "• Canyoning thác Datanla\n"
+                response += "• Đi xe ATV\n"
+                response += "• Trekking Langbiang\n"
+                response += "• Zipline rừng thông\n"
+            elif "sapa" in dest_lower:
+                response += "📍 Sapa:\n"
+                response += "• Chinh phục Fansipan\n"
+                response += "• Trekking ruộng bậc thang\n"
+                response += "• Camping qua đêm\n"
+            elif "nha trang" in dest_lower:
+                response += "📍 Nha Trang:\n"
+                response += "• Lặn biển, snorkeling\n"
+                response += "• Dù lượn (parasailing)\n"
+                response += "• Jet ski\n"
+                response += "• Flyboard\n"
+            elif "mũi né" in dest_lower:
+                response += "📍 Mũi Né:\n"
+                response += "• Lướt ván diều (kitesurfing)\n"
+                response += "• Đi xe jeep cồn cát\n"
+                response += "• Trượt cát (sandboarding)\n"
+            else:
+                response += f"📍 {destination}:\n"
+                response += "Hỏi người dân địa phương về các hoạt động mạo hiểm\n"
         else:
-            response += "⚡ Các hoạt động:\n"
-            response += "• Thể thao dưới nước\n"
-            response += "• Leo núi/trekking\n"
-            response += "• Thể thao mạo hiểm\n"
-            response += "• Khám phá hang động\n"
+            response += "🎯 Hoạt động mạo hiểm phổ biến:\n"
+            response += "• Trekking, leo núi\n"
+            response += "• Lặn biển, snorkeling\n"
+            response += "• Dù lượn, nhảy bungee\n"
+            response += "• Rafting, canyoning\n"
+            response += "• Zipline\n"
         
-        response += "\n⚠️ An toàn:\n"
-        response += "• Sử dụng thiết bị bảo hộ\n"
-        response += "• Đi với hướng dẫn viên\n"
-        response += "• Kiểm tra sức khỏe trước\n"
-        response += "• Mua bảo hiểm\n"
+        response += "\n⚠️ Lưu ý: Chọn công ty uy tín, kiểm tra thiết bị an toàn"
         
         dispatcher.utter_message(text=response)
         return []
@@ -1027,28 +1253,23 @@ class ActionGetRomanticSpots(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
-        response = "💑 Địa điểm lãng mạn cho cặp đôi:\n\n"
-        response += "🏖️ Biển:\n"
-        response += "• Phú Quốc - Bãi Sao\n"
-        response += "• Nha Trang - Vinpearl\n"
-        response += "• Đà Nẵng - Mỹ Khê\n\n"
+        destination = tracker.get_slot("destination")
         
-        response += "🏔️ Núi:\n"
-        response += "• Đà Lạt - thành phố tình yêu\n"
-        response += "• Sapa - ruộng bậc thang\n"
-        response += "• Tam Đảo\n\n"
+        response = "💑 Địa điểm lãng mạn:\n\n"
         
-        response += "🏛️ Văn hóa:\n"
-        response += "• Hội An - phố cổ\n"
-        response += "• Huế - kinh đô\n"
-        response += "• Ninh Bình - Tràng An\n\n"
-        
-        response += "💡 Hoạt động lãng mạn:\n"
-        response += "• Ngắm hoàng hôn\n"
-        response += "• Dinner on the beach\n"
+        response += "✨ Gợi ý chung:\n"
+        response += "• Ngắm hoàng hôn/bình minh cùng nhau\n"
+        response += "• Dinner trên bãi biển\n"
         response += "• Spa couple\n"
-        response += "• Chụp ảnh cưới\n"
-        response += "• Dạo phố cổ\n"
+        response += "• Đi dạo buổi tối\n"
+        response += "• Villa/bungalow riêng tư\n\n"
+        
+        if destination:
+            response += f"📍 Gợi ý cho {destination}:\n"
+            response += "• Resort có private beach\n"
+            response += "• Nhà hàng view đẹp\n"
+            response += "• Điểm ngắm cảnh lãng mạn\n"
+            response += "• Hoạt động riêng tư cho 2 người\n"
         
         dispatcher.utter_message(text=response)
         return []
@@ -1062,81 +1283,14 @@ class ActionGetFoodTour(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
+        dispatcher.utter_message(response="utter_vietnamese_food")
+        
         destination = tracker.get_slot("destination")
+        if destination:
+            response = f"\n📍 Đặc sản {destination}:\n"
+            response += "Hãy thử các món ăn địa phương tại chợ và quán vỉa hè!"
+            dispatcher.utter_message(text=response)
         
-        if not destination:
-            dispatcher.utter_message(text="Bạn muốn khám phá ẩm thực ở đâu?")
-            return []
-        
-        response = f"🍜 Tour ẩm thực tại {destination}:\n\n"
-        
-        if "hà nội" in destination.lower():
-            response += "🥖 Món phải thử:\n"
-            response += "1. Phở Hà Nội\n"
-            response += "2. Bún chả\n"
-            response += "3. Bánh cuốn\n"
-            response += "4. Chả cá Lã Vọng\n"
-            response += "5. Cà phê trứng\n\n"
-            response += "📍 Khu vực:\n"
-            response += "• Phố cổ Hà Nội\n"
-            response += "• Chợ Đồng Xuân\n"
-            response += "• Phố Tạ Hiện\n"
-        elif "sài gòn" in destination.lower() or "tp hcm" in destination.lower():
-            response += "🍲 Món phải thử:\n"
-            response += "1. Bánh mì\n"
-            response += "2. Hủ tiếu\n"
-            response += "3. Cơm tấm\n"
-            response += "4. Bánh xèo\n"
-            response += "5. Bún riêu\n\n"
-            response += "📍 Khu vực:\n"
-            response += "• Chợ Bến Thành\n"
-            response += "• Khu Bùi Viện\n"
-            response += "• Chợ Cư xá Đô Thành\n"
-        elif "huế" in destination.lower():
-            response += "🍛 Món phải thử:\n"
-            response += "1. Bún bò Huế\n"
-            response += "2. Bánh bèo, bánh nậm\n"
-            response += "3. Cơm hến\n"
-            response += "4. Nem lụi\n"
-            response += "5. Chè Huế\n\n"
-            response += "📍 Khu vực:\n"
-            response += "• Phố đi bộ Huế\n"
-            response += "• Chợ Đông Ba\n"
-        elif "đà nẵng" in destination.lower():
-            response += "🐟 Món phải thử:\n"
-            response += "1. Mì Quảng\n"
-            response += "2. Bánh tráng cuốn thịt heo\n"
-            response += "3. Bún chả cá\n"
-            response += "4. Hải sản tươi sống\n"
-            response += "5. Bánh xèo Đà Nẵng\n\n"
-            response += "📍 Khu vực:\n"
-            response += "• Chợ Cồn\n"
-            response += "• Đường Hoàng Diệu\n"
-        elif "hội an" in destination.lower():
-            response += "🥘 Món phải thử:\n"
-            response += "1. Cao lầu\n"
-            response += "2. Bánh mì Phượng\n"
-            response += "3. Cơm gà\n"
-            response += "4. Bánh vạc (White Rose)\n"
-            response += "5. Hoành thánh\n\n"
-            response += "📍 Khu vực:\n"
-            response += "• Phố cổ Hội An\n"
-            response += "• Chợ Hội An\n"
-        else:
-            response += "🍴 Khám phá ẩm thực:\n"
-            response += "• Thử món đặc sản địa phương\n"
-            response += "• Ăn ở quán ăn bình dân\n"
-            response += "• Tham gia food tour\n"
-            response += "• Ghé chợ địa phương\n"
-            response += "• Học nấu ăn\n"
-        
-        response += "\n💡 Tips:\n"
-        response += "• Ăn ở nơi đông khách\n"
-        response += "• Hỏi người địa phương\n"
-        response += "• Thử món đường phố\n"
-        response += "• Mang tiền mặt\n"
-        
-        dispatcher.utter_message(text=response)
         return []
 
 
@@ -1144,37 +1298,7 @@ class ValidateSearchDestinationForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_search_destination_form"
 
-    def validate_destination(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Validate destination value."""
-        
-        if slot_value and len(slot_value) > 2:
-            return {"destination": slot_value}
-        else:
-            dispatcher.utter_message(text="Vui lòng nhập tên điểm đến hợp lệ (ít nhất 3 ký tự).")
-            return {"destination": None}
-
 
 class ValidateSearchHotelForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_search_hotel_form"
-
-    def validate_destination(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Validate destination value."""
-        
-        if slot_value and len(slot_value) > 2:
-            return {"destination": slot_value}
-        else:
-            dispatcher.utter_message(text="Vui lòng nhập tên điểm đến hợp lệ (ít nhất 3 ký tự).")
-            return {"destination": None}
