@@ -30,7 +30,7 @@ async def shutdown():
 
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
-app.include_router(ws_router, prefix="/ws")
+app.include_router(ws_router)
 @app.get("/")
 async def root():
     return {
