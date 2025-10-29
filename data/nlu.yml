@@ -102,35 +102,18 @@ nlu:
 
 - intent: search_destination
   examples: |
-    - tìm [điểm du lịch](category) ở [Đà Nẵng](province)
-    - cho tôi xem các [bãi biển](category) đẹp
-    - [địa điểm du lịch](category) ở [miền Trung](region)
-    - tìm [điểm tham quan](category) ở [Hà Nội](province)
-    - du lịch [Phú Quốc](destination)
-    - có [điểm nào](category) hay ở [Sapa](destination)
-    - muốn đi [biển](category)
-    - [núi](category) nào đẹp
-    - địa điểm du lịch [miền Bắc](region)
-    - cho tôi gợi ý [điểm đến](category)
-    - nên đi đâu ở [miền Nam](region)
-    - [thành phố](category) nào đáng đi
-    - [khu du lịch](category) nổi tiếng ở [Quảng Ninh](province)
-    - muốn đi [vùng núi](category)
-    - [phố cổ](category) ở đâu đẹp
-    - tìm [thác nước](category) đẹp
-    - [hang động](category) nổi tiếng
-    - [đảo](category) đẹp ở Việt Nam
-    - nơi nào có [cảnh đẹp](category)
-    - [resort](category) nghỉ dưỡng
+    - tìm [điểm du lịch](category) ở [miền Trung](region)
+    - [địa điểm du lịch](category) ở [miền Bắc](region)
+    - [biển](category) nào đẹp
+    - [núi](category) nào đáng đi
+    - [hang động](category) nổi tiếng ở Việt Nam
     - [vườn quốc gia](category) nào đẹp
-    - [di tích lịch sử](category) ở [Huế](province)
-    - [bãi tắm](category) sạch đẹp
-    - nên đi [Nha Trang](destination) hay [Vũng Tàu](destination)
-    - [chùa](category) linh thiêng
-    - [khu vui chơi](category) cho gia đình
-    - nơi [chụp ảnh](category) đẹp
-    - [cao nguyên](category) nào hay
-    - [vịnh](category) đẹp nhất
+    - [thác nước](category) nổi tiếng
+    - [điểm đến](category) được yêu thích
+    - [khu du lịch](category) nổi tiếng
+    - [đảo](category) đẹp ở Việt Nam
+    - [di tích lịch sử](category) ở [miền Trung](region)
+
 
 - intent: search_hotel
   examples: |
@@ -556,3 +539,26 @@ nlu:
     - làm đẹp
     - mua sắm online
     - game
+
+- intent: search_place_in_city
+  examples: |
+    - các [địa điểm](category) ở [Hà Nội](province)
+    - những nơi nên đi ở [Đà Nẵng](province)
+    - [đi đâu](category) ở [Sài Gòn](province)
+    - [địa điểm tham quan](category) nổi tiếng ở [Huế](province)
+    - [chơi gì](activity_type) ở [Nha Trang](province)
+    - [địa điểm check-in](category) ở [Đà Lạt](province)
+    - [chỗ tham quan](category) ở [Hội An](province)
+    - [địa danh](category) nổi bật ở [Hà Nội](province)
+    - [đi đâu chơi](activity_type) ở [Vũng Tàu](province)
+    - [địa điểm du lịch](category) trong [thành phố Hồ Chí Minh](province)
+    - [địa điểm ăn uống](category) ở [Đà Nẵng](province)
+    - [địa điểm đẹp](category) ở [Sapa](province)
+    - [nơi tham quan](category) ở [Huế](province)
+    - [địa điểm nổi tiếng](category) của [Hà Nội](province)
+    - [địa điểm vui chơi](category) ở [Hà Nội](province)
+    - [địa điểm du lịch](category) quanh [Đà Lạt](province)
+    - [điểm đến](category) trong [thành phố Đà Nẵng](province)
+    - [địa điểm checkin](category) ở [Hội An](province)
+    - [điểm tham quan](category) trong [Huế](province)
+    - [địa điểm hot](category) ở [Sài Gòn](province)

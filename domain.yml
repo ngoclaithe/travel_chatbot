@@ -332,6 +332,8 @@ responses:
 
 actions:
   - action_search_destination
+  - action_search_destination_fuzzy
+  - action_search_by_city
   - action_search_hotel
   - action_search_restaurant
   - action_search_activity

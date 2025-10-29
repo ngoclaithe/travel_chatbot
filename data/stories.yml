@@ -655,3 +655,31 @@ stories:
   - action: utter_you_are_welcome
   - intent: goodbye
   - action: utter_goodbye
+
+- story: fuzzy search by name
+  steps:
+  - intent: search_destination
+    entities:
+    - destination: "ho guom"
+  - action: action_search_destination_fuzzy
+
+- story: search all places in city
+  steps:
+  - intent: search_destination
+    entities:
+    - province: "Hà Nội"
+  - action: action_search_by_city
+  - intent: affirm
+  - intent: search_hotel
+    entities:
+    - destination: "Hà Nội"
+  - action: action_search_hotel
+
+- story: typo in destination name
+  steps:
+  - intent: search_destination
+    entities:
+    - destination: "da nang"
+  - action: action_search_destination_fuzzy
+  - intent: affirm
+  - action: action_search_hotel

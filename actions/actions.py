@@ -15,7 +15,7 @@ DB_CONFIG = {
     'host': 'localhost',
     'database': 'travel_chatbot',
     'user': 'postgres',
-    'password': 'your_password',
+    'password': 'test1234',
     'port': 5432
 }
 
@@ -109,7 +109,6 @@ def format_results(results, entity_type):
     
     return response
 
-
 class ActionSearchDestination(Action):
     def name(self) -> Text:
         return "action_search_destination"
@@ -118,47 +117,102 @@ class ActionSearchDestination(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
+        print("\n" + "="*80)
+        print("🔍 ACTION: ActionSearchDestination")
+        print("="*80)
+        
         destination = tracker.get_slot("destination")
         province = tracker.get_slot("province")
         region = tracker.get_slot("region")
-        category = tracker.get_slot("category")
+        
+        # DEBUG: Print slots
+        print("\n📦 SLOTS EXTRACTED:")
+        print(f"   destination: '{destination}'")
+        print(f"   province: '{province}'")
+        print(f"   region: '{region}'")
+        
+        # DEBUG: Print entities
+        entities = tracker.latest_message.get('entities', [])
+        print(f"\n🏷️  ENTITIES IN MESSAGE:")
+        for entity in entities:
+            print(f"   - {entity['entity']}: '{entity['value']}' (confidence: {entity.get('confidence', 'N/A')})")
+        
+        user_text = tracker.latest_message.get('text', '')
+        print(f"\n💬 USER MESSAGE: '{user_text}'")
         
         conn = get_db_connection()
         if not conn:
+            print("❌ DATABASE CONNECTION FAILED!")
             dispatcher.utter_message(text="Xin lỗi, hiện tại hệ thống đang gặp sự cố. Vui lòng thử lại sau.")
             return []
+        
+        print("✅ DATABASE CONNECTION OK")
         
         try:
             cur = conn.cursor(cursor_factory=RealDictCursor)
             
+            # Build query - BỎ category
             query = "SELECT * FROM destinations WHERE 1=1"
             params = []
             
             if destination:
                 query += " AND LOWER(name) LIKE LOWER(%s)"
                 params.append(f"%{destination}%")
+                print(f"\n   Added filter: name LIKE '%{destination}%'")
             
             if province:
                 query += " AND LOWER(province) LIKE LOWER(%s)"
                 params.append(f"%{province}%")
+                print(f"   Added filter: province LIKE '%{province}%'")
             
             if region:
                 query += " AND LOWER(region) LIKE LOWER(%s)"
                 params.append(f"%{region}%")
-            
-            if category:
-                query += " AND LOWER(category) LIKE LOWER(%s)"
-                params.append(f"%{category}%")
+                print(f"   Added filter: region LIKE '%{region}%'")
             
             query += " ORDER BY rating DESC LIMIT 10"
             
+            # DEBUG: Print query
+            print(f"\n🔧 SQL QUERY:")
+            print(f"   {query}")
+            print(f"\n📝 PARAMS:")
+            print(f"   {params}")
+            
+            try:
+                actual_query = cur.mogrify(query, params).decode('utf-8')
+                print(f"\n✨ ACTUAL QUERY:")
+                print(f"   {actual_query}")
+            except:
+                pass
+            
+            # Execute
+            print(f"\n⚙️  EXECUTING QUERY...")
             cur.execute(query, params)
             results = cur.fetchall()
+            
+            print(f"\n📊 QUERY RESULTS:")
+            print(f"   Found {len(results)} result(s)")
+            
+            if results:
+                print(f"\n📋 RESULTS:")
+                for idx, result in enumerate(results[:5], 1):
+                    print(f"   {idx}. {result.get('name', 'N/A')} - {result.get('province', 'N/A')} ({result.get('category', 'N/A')})")
+            else:
+                print("   ⚠️  No results found!")
             
             message = format_results(results, 'destination')
             dispatcher.utter_message(text=message)
             
+            print("\n✅ ACTION COMPLETED")
+            print("="*80 + "\n")
+            
         except Exception as e:
+            print(f"\n❌ EXCEPTION: {type(e).__name__}")
+            print(f"   Message: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            print("="*80 + "\n")
+            
             logger.error(f"Error in ActionSearchDestination: {e}")
             dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm. Vui lòng thử lại.")
         finally:
@@ -169,6 +223,155 @@ class ActionSearchDestination(Action):
         
         return []
 
+class ActionSearchDestinationFuzzy(Action):
+    """Search với fuzzy matching cho tên địa điểm (xử lý typo, tên gần giống)"""
+    
+    def name(self) -> Text:
+        return "action_search_destination_fuzzy"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        print("\nACTION: ActionSearchDestinationFuzzy")
+        
+        destination = tracker.get_slot("destination")
+        
+        if not destination:
+            dispatcher.utter_message(text="Bạn muốn tìm địa điểm nào?")
+            return []
+        
+        conn = get_db_connection()
+        if not conn:
+            dispatcher.utter_message(text="Lỗi kết nối database")
+            return []
+        
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            # Fuzzy search using PostgreSQL similarity functions
+            # Cần enable extension pg_trgm: CREATE EXTENSION IF NOT EXISTS pg_trgm;
+            query = """
+                SELECT *, 
+                    similarity(LOWER(name), LOWER(%s)) as sim_score
+                FROM destinations 
+                WHERE similarity(LOWER(name), LOWER(%s)) > 0.3
+                ORDER BY sim_score DESC
+                LIMIT 5
+            """
+            
+            cur.execute(query, [destination, destination])
+            results = cur.fetchall()
+            
+            print(f"Fuzzy search for '{destination}': found {len(results)} results")
+            
+            if results:
+                for r in results:
+                    print(f"  - {r['name']} (similarity: {r['sim_score']:.2f})")
+            
+            message = format_results(results, 'destination')
+            dispatcher.utter_message(text=message)
+            
+        except Exception as e:
+            print(f"ERROR: {e}")
+            # Fallback to normal LIKE search
+            query = "SELECT * FROM destinations WHERE LOWER(name) LIKE LOWER(%s) LIMIT 5"
+            cur.execute(query, [f"%{destination}%"])
+            results = cur.fetchall()
+            message = format_results(results, 'destination')
+            dispatcher.utter_message(text=message)
+            
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
+        
+        return []
+
+
+class ActionSearchByCity(Action):
+    """Tìm TẤT CẢ địa điểm du lịch trong một thành phố"""
+    
+    def name(self) -> Text:
+        return "action_search_by_city"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        print("\nACTION: ActionSearchByCity")
+        
+        province = tracker.get_slot("province")
+        
+        if not province:
+            dispatcher.utter_message(text="Bạn muốn tìm ở thành phố nào?")
+            return []
+        
+        conn = get_db_connection()
+        if not conn:
+            dispatcher.utter_message(text="Lỗi kết nối database")
+            return []
+        
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            # Get ALL destinations in the city
+            query = """
+                SELECT * FROM destinations 
+                WHERE LOWER(province) LIKE LOWER(%s)
+                ORDER BY rating DESC
+            """
+            
+            cur.execute(query, [f"%{province}%"])
+            results = cur.fetchall()
+            
+            print(f"Found {len(results)} places in {province}")
+            
+            if not results:
+                dispatcher.utter_message(text=f"Không tìm thấy địa điểm nào ở {province}")
+                return []
+            
+            # Summary by category
+            categories = {}
+            for r in results:
+                cat = r.get('category', 'khác')
+                categories[cat] = categories.get(cat, 0) + 1
+            
+            response = f"Tìm thấy {len(results)} địa điểm ở {province}:\n\n"
+            
+            # Show category summary
+            for cat, count in categories.items():
+                response += f"- {cat.capitalize()}: {count} địa điểm\n"
+            
+            response += f"\nTop {min(5, len(results))} địa điểm được đánh giá cao nhất:\n\n"
+            
+            # Show top 5
+            for idx, item in enumerate(results[:5], 1):
+                response += f"{idx}. {item['name']}"
+                if item.get('rating'):
+                    response += f" ({item['rating']}/5)"
+                response += f"\n   Loại: {item.get('category', 'N/A')}\n"
+                if item.get('description'):
+                    desc = item['description'][:80] + "..."
+                    response += f"   {desc}\n"
+                response += "\n"
+            
+            dispatcher.utter_message(text=response)
+            
+        except Exception as e:
+            print(f"ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm")
+            
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
+        
+        return []
 
 class ActionSearchHotel(Action):
     def name(self) -> Text:
@@ -676,11 +879,18 @@ class ActionRecommendBudget(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
+        print("\n" + "="*60)
+        print("ACTION: ActionRecommendBudget")
+        print("="*60)
+        
         destination = tracker.get_slot("destination")
         duration = tracker.get_slot("duration")
         traveler_count = tracker.get_slot("traveler_count")
         
+        print(f"Slots: destination={destination}, duration={duration}, traveler_count={traveler_count}")
+        
         if not destination:
+            print("ERROR: No destination provided")
             dispatcher.utter_message(text="Bạn muốn đi đâu để tôi tính ngân sách giúp bạn?")
             return []
         
@@ -691,51 +901,64 @@ class ActionRecommendBudget(Action):
         if duration:
             try:
                 days = int(''.join(filter(str.isdigit, str(duration))))
-            except:
+                print(f"Extracted days: {days}")
+            except Exception as e:
+                print(f"Error parsing duration: {e}")
                 days = 3
         
         if traveler_count:
             try:
                 people = int(''.join(filter(str.isdigit, str(traveler_count))))
-            except:
+                print(f"Extracted people: {people}")
+            except Exception as e:
+                print(f"Error parsing traveler_count: {e}")
                 people = 1
         
         conn = get_db_connection()
         if not conn:
+            print("ERROR: Database connection failed")
             dispatcher.utter_message(response="utter_budget_ranges")
             return []
         
+        print("Database connected")
+        
         try:
             cur = conn.cursor(cursor_factory=RealDictCursor)
-            
-            # Get average prices
+                        
             query = """
                 SELECT 
                     d.name as destination_name,
                     AVG(CASE 
-                        WHEN h.price_range LIKE '%rẻ%' THEN 500000
-                        WHEN h.price_range LIKE '%trung bình%' THEN 1000000
-                        WHEN h.price_range LIKE '%cao cấp%' THEN 2500000
+                        WHEN h.price_range LIKE '%%rẻ%%' THEN 500000
+                        WHEN h.price_range LIKE '%%trung bình%%' THEN 1000000
+                        WHEN h.price_range LIKE '%%cao cấp%%' THEN 2500000
                         ELSE 1000000
                     END) as avg_hotel_price,
                     AVG(CASE 
-                        WHEN r.price_range LIKE '%rẻ%' THEN 100000
-                        WHEN r.price_range LIKE '%trung bình%' THEN 250000
-                        WHEN r.price_range LIKE '%cao cấp%' THEN 500000
+                        WHEN r.price_range LIKE '%%rẻ%%' THEN 100000
+                        WHEN r.price_range LIKE '%%trung bình%%' THEN 250000
+                        WHEN r.price_range LIKE '%%cao cấp%%' THEN 500000
                         ELSE 200000
                     END) as avg_restaurant_price
                 FROM destinations d
                 LEFT JOIN hotels h ON h.destination_id = d.id
                 LEFT JOIN restaurants r ON r.destination_id = d.id
-                WHERE LOWER(d.name) LIKE LOWER(%s)
+                WHERE LOWER(d.name) LIKE %s
                 GROUP BY d.name
             """
-            
-            cur.execute(query, [f"%{destination}%"])
+
+            param = f"%{destination.lower()}%"
+            print(f"Query param: {param}")
+
+            cur.execute(query, (param,))
+
             result = cur.fetchone()
             
+            print(f"Query result: {result}")
+            
             if not result:
-                dispatcher.utter_message(response="utter_budget_ranges")
+                print("ERROR: No destination found in database")
+                dispatcher.utter_message(text=f"Xin lỗi, tôi không tìm thấy thông tin về {destination}.")
                 return []
             
             hotel_per_night = result['avg_hotel_price'] or 1000000
@@ -743,33 +966,44 @@ class ActionRecommendBudget(Action):
             activities_per_day = 300000
             transport = 500000
             
+            print(f"Prices: hotel={hotel_per_night}, food={food_per_day}, activities={activities_per_day}")
+            
             # Calculate per person
             hotel_total = hotel_per_night * days
             food_total = food_per_day * days
             activities_total = activities_per_day * days
             
-            # Some costs are shared
             per_person = (hotel_total + food_total + activities_total + transport) / people if people > 1 else (hotel_total + food_total + activities_total + transport)
             total_group = per_person * people
             
-            response = f"💰 Ngân sách dự kiến cho chuyến đi {result['destination_name']}:\n\n"
-            response += f"👥 Số người: {people}\n"
-            response += f"📅 Thời gian: {days} ngày\n\n"
+            print(f"Calculated: per_person={per_person}, total_group={total_group}")
+            
+            response = f"Ngân sách dự kiến cho chuyến đi {result['destination_name']}:\n\n"
+            response += f"Số người: {people}\n"
+            response += f"Thời gian: {days} ngày\n\n"
             response += f"Chi phí cho 1 người:\n"
-            response += f"• 🏨 Khách sạn: {hotel_total/people if people > 1 else hotel_total:,.0f} VNĐ ({hotel_per_night:,.0f} VNĐ/đêm)\n"
-            response += f"• 🍜 Ăn uống: {food_total:,.0f} VNĐ ({food_per_day:,.0f} VNĐ/ngày)\n"
-            response += f"• 🎯 Hoạt động: {activities_total:,.0f} VNĐ ({activities_per_day:,.0f} VNĐ/ngày)\n"
-            response += f"• 🚗 Di chuyển: {transport/people if people > 1 else transport:,.0f} VNĐ\n\n"
-            response += f"💵 Tổng/người: {per_person:,.0f} VNĐ\n"
+            response += f"- Khách sạn: {hotel_total/people if people > 1 else hotel_total:,.0f} VNĐ ({hotel_per_night:,.0f} VNĐ/đêm)\n"
+            response += f"- Ăn uống: {food_total:,.0f} VNĐ ({food_per_day:,.0f} VNĐ/ngày)\n"
+            response += f"- Hoạt động: {activities_total:,.0f} VNĐ ({activities_per_day:,.0f} VNĐ/ngày)\n"
+            response += f"- Di chuyển: {transport/people if people > 1 else transport:,.0f} VNĐ\n\n"
+            response += f"Tổng/người: {per_person:,.0f} VNĐ\n"
             
             if people > 1:
-                response += f"💵 Tổng cả nhóm: {total_group:,.0f} VNĐ\n"
+                response += f"Tổng cả nhóm: {total_group:,.0f} VNĐ\n"
             
-            response += f"\n📝 Lưu ý: Chưa bao gồm vé máy bay và mua sắm cá nhân"
+            response += f"\nLưu ý: Chưa bao gồm vé máy bay và mua sắm cá nhân"
             
             dispatcher.utter_message(text=response)
             
+            print("SUCCESS: Budget calculated and sent")
+            print("="*60 + "\n")
+            
         except Exception as e:
+            print(f"ERROR: Exception occurred - {type(e).__name__}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            print("="*60 + "\n")
+            
             logger.error(f"Error in ActionRecommendBudget: {e}")
             dispatcher.utter_message(response="utter_budget_ranges")
         finally:
@@ -779,8 +1013,7 @@ class ActionRecommendBudget(Action):
                 conn.close()
         
         return []
-
-
+    
 class ActionCompareDestinations(Action):
     def name(self) -> Text:
         return "action_compare_destinations"
@@ -955,20 +1188,26 @@ class ActionGetPackingList(Action):
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        
+
+        print("\n" + "="*60)
+        print("ACTION: ActionGetPackingList CALLED")
+        print("="*60)
+
         destination = tracker.get_slot("destination")
         category = tracker.get_slot("category")
         season = tracker.get_slot("season")
-        
+
+        print(f"Slots: destination={destination}, category={category}, season={season}")
+
         response = "🎒 Danh sách đồ cần mang:\n\n"
-        
+
         # Base items
         response += "📋 Đồ cơ bản:\n"
         response += "• Giấy tờ tùy thân (CMND/Passport)\n"
         response += "• Tiền mặt và thẻ ngân hàng\n"
         response += "• Điện thoại, sạc, pin dự phòng\n"
         response += "• Thuốc cá nhân\n\n"
-        
+
         # Category specific
         if category:
             if "biển" in str(category).lower():
@@ -978,7 +1217,6 @@ class ActionGetPackingList(Action):
                 response += "• Mũ, kính râm\n"
                 response += "• Dép đi biển\n"
                 response += "• Túi chống nước cho điện thoại\n\n"
-            
             elif "núi" in str(category).lower():
                 response += "⛰️ Đi núi:\n"
                 response += "• Giày trekking tốt\n"
@@ -986,7 +1224,7 @@ class ActionGetPackingList(Action):
                 response += "• Mũ/nón chống nắng\n"
                 response += "• Ba lô chắc chắn\n"
                 response += "• Đèn pin/headlamp\n\n"
-        
+
         # Season specific
         if season:
             if "đông" in str(season).lower() or "lạnh" in str(season).lower():
@@ -999,10 +1237,14 @@ class ActionGetPackingList(Action):
                 response += "• Quần áo mỏng, thoáng mát\n"
                 response += "• Kem chống nắng\n"
                 response += "• Mũ/nón rộng vành\n\n"
-        
-        dispatcher.utter_message(text=response)
-        return []
 
+        # Gửi phản hồi
+        dispatcher.utter_message(text=response)
+
+        print("✅ ActionGetPackingList executed successfully")
+        print("="*60 + "\n")
+
+        return []
 
 class ActionGetLocalCulture(Action):
     def name(self) -> Text:
