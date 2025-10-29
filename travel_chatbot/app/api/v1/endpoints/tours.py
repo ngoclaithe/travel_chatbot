@@ -15,7 +15,8 @@ async def create_tour(tour: TourCreate, db=Depends(get_db)):
 @router.get("/", response_model=List[dict])
 async def get_tours(skip: int = 0, limit: int = 100, db=Depends(get_db)):
     query = tours.select().offset(skip).limit(limit)
-    return await db.fetch_all(query)
+    results = await db.fetch_all(query)
+    return [dict(r) for r in results]
 
 @router.get("/{tour_id}", response_model=dict)
 async def get_tour(tour_id: int, db=Depends(get_db)):
@@ -23,7 +24,7 @@ async def get_tour(tour_id: int, db=Depends(get_db)):
     result = await db.fetch_one(query)
     if not result:
         raise HTTPException(status_code=404, detail="Tour not found")
-    return result
+    return dict(result)
 
 @router.put("/{tour_id}", response_model=dict)
 async def update_tour(tour_id: int, tour: TourUpdate, db=Depends(get_db)):
@@ -32,7 +33,11 @@ async def update_tour(tour_id: int, tour: TourUpdate, db=Depends(get_db)):
         raise HTTPException(status_code=400, detail="No fields to update")
     query = tours.update().where(tours.c.id == tour_id).values(**update_data)
     await db.execute(query)
-    return await get_tour(tour_id, db)
+    query_select = tours.select().where(tours.c.id == tour_id)
+    updated = await db.fetch_one(query_select)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Tour not found after update")
+    return dict(updated)
 
 @router.delete("/{tour_id}")
 async def delete_tour(tour_id: int, db=Depends(get_db)):

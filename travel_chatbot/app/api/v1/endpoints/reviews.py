@@ -15,7 +15,8 @@ async def create_review(review: ReviewCreate, db=Depends(get_db)):
 @router.get("/", response_model=List[dict])
 async def get_reviews(skip: int = 0, limit: int = 100, db=Depends(get_db)):
     query = reviews.select().offset(skip).limit(limit)
-    return await db.fetch_all(query)
+    results = await db.fetch_all(query)
+    return [dict(r) for r in results]
 
 @router.get("/{review_id}", response_model=dict)
 async def get_review(review_id: int, db=Depends(get_db)):
@@ -23,7 +24,7 @@ async def get_review(review_id: int, db=Depends(get_db)):
     result = await db.fetch_one(query)
     if not result:
         raise HTTPException(status_code=404, detail="Review not found")
-    return result
+    return dict(result)
 
 @router.put("/{review_id}", response_model=dict)
 async def update_review(review_id: int, review: ReviewUpdate, db=Depends(get_db)):
@@ -32,7 +33,11 @@ async def update_review(review_id: int, review: ReviewUpdate, db=Depends(get_db)
         raise HTTPException(status_code=400, detail="No fields to update")
     query = reviews.update().where(reviews.c.id == review_id).values(**update_data)
     await db.execute(query)
-    return await get_review(review_id, db)
+    query_select = reviews.select().where(reviews.c.id == review_id)
+    updated = await db.fetch_one(query_select)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Review not found after update")
+    return dict(updated)
 
 @router.delete("/{review_id}")
 async def delete_review(review_id: int, db=Depends(get_db)):

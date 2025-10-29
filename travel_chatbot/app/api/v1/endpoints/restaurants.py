@@ -15,7 +15,8 @@ async def create_restaurant(restaurant: RestaurantCreate, db=Depends(get_db)):
 @router.get("/", response_model=List[dict])
 async def get_restaurants(skip: int = 0, limit: int = 100, db=Depends(get_db)):
     query = restaurants.select().offset(skip).limit(limit)
-    return await db.fetch_all(query)
+    results = await db.fetch_all(query)
+    return [dict(r) for r in results]
 
 @router.get("/{restaurant_id}", response_model=dict)
 async def get_restaurant(restaurant_id: int, db=Depends(get_db)):
@@ -23,7 +24,7 @@ async def get_restaurant(restaurant_id: int, db=Depends(get_db)):
     result = await db.fetch_one(query)
     if not result:
         raise HTTPException(status_code=404, detail="Restaurant not found")
-    return result
+    return dict(result)
 
 @router.put("/{restaurant_id}", response_model=dict)
 async def update_restaurant(restaurant_id: int, restaurant: RestaurantUpdate, db=Depends(get_db)):
@@ -32,7 +33,11 @@ async def update_restaurant(restaurant_id: int, restaurant: RestaurantUpdate, db
         raise HTTPException(status_code=400, detail="No fields to update")
     query = restaurants.update().where(restaurants.c.id == restaurant_id).values(**update_data)
     await db.execute(query)
-    return await get_restaurant(restaurant_id, db)
+    query_select = restaurants.select().where(restaurants.c.id == restaurant_id)
+    updated = await db.fetch_one(query_select)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Restaurant not found after update")
+    return dict(updated)
 
 @router.delete("/{restaurant_id}")
 async def delete_restaurant(restaurant_id: int, db=Depends(get_db)):

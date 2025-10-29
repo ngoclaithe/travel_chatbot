@@ -15,7 +15,8 @@ async def create_transportation(trans: TransportationCreate, db=Depends(get_db))
 @router.get("/", response_model=List[dict])
 async def get_transportations(skip: int = 0, limit: int = 100, db=Depends(get_db)):
     query = transportation.select().offset(skip).limit(limit)
-    return await db.fetch_all(query)
+    results = await db.fetch_all(query)
+    return [dict(r) for r in results]
 
 @router.get("/{trans_id}", response_model=dict)
 async def get_transportation(trans_id: int, db=Depends(get_db)):
@@ -23,7 +24,7 @@ async def get_transportation(trans_id: int, db=Depends(get_db)):
     result = await db.fetch_one(query)
     if not result:
         raise HTTPException(status_code=404, detail="Transportation not found")
-    return result
+    return dict(result)
 
 @router.put("/{trans_id}", response_model=dict)
 async def update_transportation(trans_id: int, trans: TransportationUpdate, db=Depends(get_db)):
@@ -32,7 +33,11 @@ async def update_transportation(trans_id: int, trans: TransportationUpdate, db=D
         raise HTTPException(status_code=400, detail="No fields to update")
     query = transportation.update().where(transportation.c.id == trans_id).values(**update_data)
     await db.execute(query)
-    return await get_transportation(trans_id, db)
+    query_select = transportation.select().where(transportation.c.id == trans_id)
+    updated = await db.fetch_one(query_select)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Transportation not found after update")
+    return dict(updated)
 
 @router.delete("/{trans_id}")
 async def delete_transportation(trans_id: int, db=Depends(get_db)):
