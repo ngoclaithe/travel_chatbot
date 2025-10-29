@@ -6,3 +6,4 @@ asyncpg
 pydantic
 python-dotenv
 pydantic-settings
+httpx
