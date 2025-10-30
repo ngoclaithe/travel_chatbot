@@ -10,7 +10,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Database connection configuration
 DB_CONFIG = {
     'host': 'localhost',
     'database': 'travel_chatbot',
@@ -125,13 +124,11 @@ class ActionSearchDestination(Action):
         province = tracker.get_slot("province")
         region = tracker.get_slot("region")
         
-        # DEBUG: Print slots
         print("\n📦 SLOTS EXTRACTED:")
         print(f"   destination: '{destination}'")
         print(f"   province: '{province}'")
         print(f"   region: '{region}'")
         
-        # DEBUG: Print entities
         entities = tracker.latest_message.get('entities', [])
         print(f"\n🏷️  ENTITIES IN MESSAGE:")
         for entity in entities:
@@ -151,7 +148,6 @@ class ActionSearchDestination(Action):
         try:
             cur = conn.cursor(cursor_factory=RealDictCursor)
             
-            # Build query - BỎ category
             query = "SELECT * FROM destinations WHERE 1=1"
             params = []
             
@@ -172,7 +168,6 @@ class ActionSearchDestination(Action):
             
             query += " ORDER BY rating DESC LIMIT 10"
             
-            # DEBUG: Print query
             print(f"\n🔧 SQL QUERY:")
             print(f"   {query}")
             print(f"\n📝 PARAMS:")
@@ -185,7 +180,6 @@ class ActionSearchDestination(Action):
             except:
                 pass
             
-            # Execute
             print(f"\n⚙️  EXECUTING QUERY...")
             cur.execute(query, params)
             results = cur.fetchall()
@@ -274,7 +268,6 @@ class ActionSearchDestinationFuzzy(Action):
             
         except Exception as e:
             print(f"ERROR: {e}")
-            # Fallback to normal LIKE search
             query = "SELECT * FROM destinations WHERE LOWER(name) LIKE LOWER(%s) LIMIT 5"
             cur.execute(query, [f"%{destination}%"])
             results = cur.fetchall()
@@ -316,7 +309,6 @@ class ActionSearchByCity(Action):
         try:
             cur = conn.cursor(cursor_factory=RealDictCursor)
             
-            # Get ALL destinations in the city
             query = """
                 SELECT * FROM destinations 
                 WHERE LOWER(province) LIKE LOWER(%s)
@@ -332,7 +324,6 @@ class ActionSearchByCity(Action):
                 dispatcher.utter_message(text=f"Không tìm thấy địa điểm nào ở {province}")
                 return []
             
-            # Summary by category
             categories = {}
             for r in results:
                 cat = r.get('category', 'khác')
@@ -340,13 +331,11 @@ class ActionSearchByCity(Action):
             
             response = f"Tìm thấy {len(results)} địa điểm ở {province}:\n\n"
             
-            # Show category summary
             for cat, count in categories.items():
                 response += f"- {cat.capitalize()}: {count} địa điểm\n"
             
             response += f"\nTop {min(5, len(results))} địa điểm được đánh giá cao nhất:\n\n"
             
-            # Show top 5
             for idx, item in enumerate(results[:5], 1):
                 response += f"{idx}. {item['name']}"
                 if item.get('rating'):
@@ -687,7 +676,6 @@ class ActionGetBestTime(Action):
         try:
             cur = conn.cursor(cursor_factory=RealDictCursor)
             
-            # Get weather data to determine best time
             query = """
                 SELECT w.*, d.name as destination_name, d.region
                 FROM weather w
@@ -705,12 +693,10 @@ class ActionGetBestTime(Action):
                 dest_name = results[0]['destination_name']
                 region = results[0].get('region', '')
                 
-                # Recommend based on temperature and description
                 good_months = []
                 for item in results:
                     temp = item['avg_temp']
                     desc = item['description'].lower()
-                    # Good weather: 20-30°C, no heavy rain
                     if 20 <= temp <= 30 and 'mưa' not in desc and 'bão' not in desc:
                         good_months.append(item['month'])
                 
@@ -828,7 +814,6 @@ class ActionGetReviews(Action):
         try:
             cur = conn.cursor(cursor_factory=RealDictCursor)
             
-            # Get destination reviews
             query = """
                 SELECT r.*, d.name as destination_name 
                 FROM reviews r
@@ -894,7 +879,6 @@ class ActionRecommendBudget(Action):
             dispatcher.utter_message(text="Bạn muốn đi đâu để tôi tính ngân sách giúp bạn?")
             return []
         
-        # Default values
         days = 3
         people = 1
         
@@ -968,7 +952,6 @@ class ActionRecommendBudget(Action):
             
             print(f"Prices: hotel={hotel_per_night}, food={food_per_day}, activities={activities_per_day}")
             
-            # Calculate per person
             hotel_total = hotel_per_night * days
             food_total = food_per_day * days
             activities_total = activities_per_day * days
@@ -1022,7 +1005,6 @@ class ActionCompareDestinations(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
-        # Get all destination entities from the message
         entities = tracker.latest_message.get('entities', [])
         destinations = [e['value'] for e in entities if e['entity'] == 'destination']
         
@@ -1072,7 +1054,6 @@ class ActionCompareDestinations(Action):
                 response += f"   • Mô tả: {desc}\n"
             response += "\n"
             
-            # Simple comparison
             if result1['rating'] > result2['rating']:
                 response += f"⭐ {result1['name']} có đánh giá cao hơn\n"
             elif result2['rating'] > result1['rating']:
@@ -1201,14 +1182,12 @@ class ActionGetPackingList(Action):
 
         response = "🎒 Danh sách đồ cần mang:\n\n"
 
-        # Base items
         response += "📋 Đồ cơ bản:\n"
         response += "• Giấy tờ tùy thân (CMND/Passport)\n"
         response += "• Tiền mặt và thẻ ngân hàng\n"
         response += "• Điện thoại, sạc, pin dự phòng\n"
         response += "• Thuốc cá nhân\n\n"
 
-        # Category specific
         if category:
             if "biển" in str(category).lower():
                 response += "🏖️ Đi biển:\n"
@@ -1225,7 +1204,6 @@ class ActionGetPackingList(Action):
                 response += "• Ba lô chắc chắn\n"
                 response += "• Đèn pin/headlamp\n\n"
 
-        # Season specific
         if season:
             if "đông" in str(season).lower() or "lạnh" in str(season).lower():
                 response += "❄️ Mùa đông:\n"
@@ -1238,7 +1216,6 @@ class ActionGetPackingList(Action):
                 response += "• Kem chống nắng\n"
                 response += "• Mũ/nón rộng vành\n\n"
 
-        # Gửi phản hồi
         dispatcher.utter_message(text=response)
 
         print("✅ ActionGetPackingList executed successfully")
@@ -1299,7 +1276,6 @@ class ActionGetPhotographySpots(Action):
             dispatcher.utter_message(response="utter_top_beaches")
             return []
         
-        # Common photography tips
         response = f"📸 Địa điểm chụp ảnh đẹp:\n\n"
         response += "💡 Tips chụp ảnh:\n"
         response += "• Golden hour: 6-8h sáng, 16-18h chiều\n"
@@ -1307,7 +1283,6 @@ class ActionGetPhotographySpots(Action):
         response += "• Dậy sớm để tránh đông người\n"
         response += "• Xin phép trước khi chụp người dân\n\n"
         
-        # Destination-specific spots (you can expand this)
         dest_lower = destination.lower()
         if "đà nẵng" in dest_lower:
             response += "📍 Đà Nẵng:\n"

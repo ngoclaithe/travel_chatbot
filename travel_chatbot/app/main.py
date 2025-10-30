@@ -10,16 +10,22 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_PREFIX}/openapi.json"
 )
 
-# CORS Middleware
+
+origins = [
+    "https://travelbotvn29.vercel.app", 
+    "https://www.travelbotvn29.vercel.app",  
+    "http://localhost:3000",  
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"], 
+    allow_headers=["*"],  
 )
 
-# Events
+
 @app.on_event("startup")
 async def startup():
     await connect_db()
@@ -28,9 +34,11 @@ async def startup():
 async def shutdown():
     await disconnect_db()
 
-# Include API router
+
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 app.include_router(ws_router)
+
+
 @app.get("/")
 async def root():
     return {
