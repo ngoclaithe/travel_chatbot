@@ -1,6 +1,6 @@
 /.rasa
 /.venv
-/models
+# /models
 
 # Ignore Python cache
 __pycache__/
