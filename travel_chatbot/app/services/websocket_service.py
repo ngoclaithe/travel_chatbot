@@ -15,13 +15,11 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             try:
-                # Nhận message với timeout 60s
                 data_text = await asyncio.wait_for(
                     websocket.receive_text(), 
                     timeout=60
                 )
                 
-                # Parse JSON
                 try:
                     data = json.loads(data_text)
                 except json.JSONDecodeError:
@@ -30,7 +28,6 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 msg_type = data.get("type")
                 
-                # Xử lý init message
                 if msg_type == "init":
                     await websocket.send_json({
                         "type": "init_ack",
@@ -38,19 +35,16 @@ async def websocket_endpoint(websocket: WebSocket):
                     })
                     continue
                 
-                # Xử lý pong từ client
                 if msg_type == "pong":
                     continue
                 
-                # Xử lý chat message
                 if msg_type == "message":
-                    user_msg = data.get("content")  # ✅ Đổi từ "message" → "content"
+                    user_msg = data.get("content") 
                     sender_id = data.get("sender", "default_user")
                     
                     if not user_msg:
                         continue
 
-                    # Gọi Rasa
                     async with httpx.AsyncClient() as client:
                         response = await client.post(
                             RASA_URL,
@@ -60,10 +54,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
                     rasa_replies = response.json()
                     
-                    # Gửi responses về frontend
                     for msg in rasa_replies:
                         await websocket.send_json({
-                            "type": "message",  # ✅ Thêm type
+                            "type": "message", 
                             "content": msg.get("text"),
                             "data": {
                                 "buttons": msg.get("buttons", []),
@@ -72,7 +65,6 @@ async def websocket_endpoint(websocket: WebSocket):
                         })
 
             except asyncio.TimeoutError:
-                # Gửi ping để giữ connection
                 await websocket.send_json({"type": "ping"})
                 
             except WebSocketDisconnect:
