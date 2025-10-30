@@ -52,10 +52,8 @@ class WebSocketService {
 
       _channel = WebSocketChannel.connect(Uri.parse(socketUrl));
 
-      // Gửi init message
       _channel!.sink.add(jsonEncode({'type': 'init'}));
 
-      // Lắng nghe tin nhắn
       _channel!.stream.listen(
         _handleMessage,
         onError: _handleError,
@@ -63,13 +61,11 @@ class WebSocketService {
         cancelOnError: false,
       );
 
-      // Thành công
       _isConnecting = false;
       _reconnectAttempts = 0;
       _onConnected?.call();
       print('✅ Đã kết nối WebSocket');
 
-      // Bắt đầu ping để giữ kết nối
       _startPingTimer();
     } catch (e) {
       _isConnecting = false;
@@ -83,35 +79,29 @@ class WebSocketService {
       final data = jsonDecode(message);
       final type = data['type'] ?? '';
 
-      // Xử lý ping/pong
       if (type == 'ping') {
         _channel?.sink.add(jsonEncode({'type': 'pong'}));
         return;
       }
 
-      // Xử lý init acknowledgment
       if (type == 'init_ack') {
-        print('✅ Server đã xác nhận kết nối: ${data['content']}');
+        print('Server đã xác nhận kết nối: ${data['content']}');
         return;
       }
 
-      // Xử lý lỗi từ server
       if (type == 'error') {
         _onError?.call(data['content'] ?? 'Lỗi từ server');
         return;
       }
 
-      // Xử lý tin nhắn thông thường
       if (type == 'message') {
         _onMessage?.call(data['content'] ?? message.toString());
         return;
       }
 
-      // Tin nhắn khác
       _onMessage?.call(data['content'] ?? message.toString());
     } catch (e) {
-      print('⚠️ Lỗi parse message: $e');
-      // Nếu không parse được JSON, gửi raw message
+      print('Lỗi parse message: $e');
       _onMessage?.call(message.toString());
     }
   }
@@ -120,7 +110,7 @@ class WebSocketService {
     _isConnecting = false;
 
     if (_reconnectAttempts == 0 || _reconnectAttempts % 5 == 0) {
-      print('💥 WebSocket error: $error');
+      print('WebSocket error: $error');
     }
 
     if (!_isManualDisconnect) {
@@ -130,24 +120,20 @@ class WebSocketService {
 
   void _handleDisconnect() {
     _isConnecting = false;
-    print('🔻 WebSocket đã đóng');
+    print('WebSocket đã đóng');
 
     _stopPingTimer();
     _channel = null;
     _onDisconnected?.call();
 
-    // Tự động reconnect nếu không phải disconnect thủ công
-    if (!_isManualDisconnect && _reconnectAttempts < _maxReconnectAttempts) {
-      _scheduleReconnect();
-    } else if (_reconnectAttempts >= _maxReconnectAttempts) {
-      _onError?.call(
-        'Không thể kết nối sau $_maxReconnectAttempts lần thử. Vui lòng thử lại sau.',
-      );
-    }
+    // if (!_isManualDisconnect && _reconnectAttempts < _maxReconnectAttempts) {
+    //   _scheduleReconnect();
+    // } else if (_reconnectAttempts >= _maxReconnectAttempts) {
+    //   _onError?.call('Không thể kết nối sau $_maxReconnectAttempts lần thử. Vui lòng thử lại sau.');
+    // }
   }
 
   void _scheduleReconnect() {
-    // Exponential backoff: 1s, 2s, 4s, 8s, 16s, max 30s
     final backoffDelay = (1 << _reconnectAttempts).clamp(1, 30);
     _reconnectAttempts++;
 
@@ -155,9 +141,7 @@ class WebSocketService {
       _onError?.call('Mất kết nối. Đang thử kết nối lại...');
     }
 
-    print(
-      '⏳ Thử kết nối lại sau ${backoffDelay}s (lần thử $_reconnectAttempts)',
-    );
+    print('Thử kết nối lại sau ${backoffDelay}s (lần thử $_reconnectAttempts)');
 
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(Duration(seconds: backoffDelay), () {
@@ -167,13 +151,12 @@ class WebSocketService {
 
   void _startPingTimer() {
     _stopPingTimer();
-    // Gửi ping mỗi 30 giây để giữ kết nối
     _pingTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       if (_channel != null) {
         try {
           _channel!.sink.add(jsonEncode({'type': 'ping'}));
         } catch (e) {
-          print('⚠️ Lỗi gửi ping: $e');
+          print('Lỗi gửi ping: $e');
         }
       }
     });
@@ -198,13 +181,13 @@ class WebSocketService {
       });
       _channel!.sink.add(data);
     } catch (e) {
-      print('💥 Lỗi gửi tin nhắn: $e');
+      print('Lỗi gửi tin nhắn: $e');
       _onError?.call('Không thể gửi tin nhắn: $e');
     }
   }
 
   void disconnect() {
-    print('🧹 Đóng kết nối WebSocket');
+    print('Đóng kết nối WebSocket');
     _isManualDisconnect = true;
 
     _reconnectTimer?.cancel();
@@ -220,12 +203,11 @@ class WebSocketService {
   }
 
   void retry() {
-    print('🔄 Thử kết nối lại thủ công');
+    print('Thử kết nối lại thủ công');
     _reconnectAttempts = 0;
     disconnect();
 
-    // Đợi một chút trước khi kết nối lại
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 1000), () {
       _connectWebSocket();
     });
   }
