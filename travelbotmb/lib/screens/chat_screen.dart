@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../services/websocket_service.dart';
 import '../models/message.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/typing_indicator.dart';
-import 'dart:async';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -30,8 +30,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _connectToSocket() {
-    if (_socketService.isConnecting || _socketService.isConnected) {
-      print('⏭️ Đã kết nối hoặc đang kết nối');
+    if (_isConnecting || _isConnected) {
       return;
     }
 
@@ -74,35 +73,14 @@ class _ChatScreenState extends State<ChatScreen> {
             _isConnected = true;
             _isConnecting = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đã kết nối với chatbot'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
         }
       },
       onError: (error) {
         if (mounted) {
           setState(() {
+            _isConnected = false;
             _isConnecting = false;
           });
-
-          if (_socketService.reconnectAttempts <= 1) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('✗ $error'),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-                action: SnackBarAction(
-                  label: 'Thử lại',
-                  textColor: Colors.white,
-                  onPressed: () => _socketService.retry(),
-                ),
-              ),
-            );
-          }
         }
       },
       onDisconnected: () {
@@ -118,20 +96,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendMessage() {
     final text = _messageController.text.trim();
-    if (text.isEmpty) return;
-
-    if (!_isConnected) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Chưa kết nối. Vui lòng kết nối trước.'),
-          backgroundColor: Colors.orange,
-          action: SnackBarAction(
-            label: 'Kết nối',
-            textColor: Colors.white,
-            onPressed: _connectToSocket,
-          ),
-        ),
-      );
+    if (text.isEmpty || !_isConnected) {
       return;
     }
 
