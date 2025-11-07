@@ -244,7 +244,7 @@ class ActionSearchDestinationFuzzy(Action):
             cur = conn.cursor(cursor_factory=RealDictCursor)
             
             # Fuzzy search using PostgreSQL similarity functions
-            # Cần enable extension pg_trgm: CREATE EXTENSION IF NOT EXISTS pg_trgm;
+            # enable extension pg_trgm: CREATE EXTENSION IF NOT EXISTS pg_trgm;
             query = """
                 SELECT *, 
                     similarity(LOWER(name), LOWER(%s)) as sim_score
