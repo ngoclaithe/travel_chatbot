@@ -94,16 +94,17 @@ chatbot_mb/.flutter-plugins-dependencies
 chatbot_mb/android/.gradle
 chatbot_mb/android/local.properties
 chatbot_mb/android/key.properties
-chatbot_mb/android/app/src/main/assets/
+chatbot_mb/android/app/src/main/assets/flutter_assets/
 # iOS
 chatbot_mb/ios/Flutter/Generated.xcconfig
 chatbot_mb/ios/Flutter/app.flx
 chatbot_mb/ios/Flutter/gen_snapshot_resources
 chatbot_mb/ios/.generated/
-chatbot_mb/ios/Podfile.lock
+# chatbot_mb/ios/Podfile.lock
 chatbot_mb/ios/Pods/
 # Windows/Linux/Mac
 chatbot_mb/windows/flutter/ephemeral/
 chatbot_mb/linux/flutter/ephemeral/
 chatbot_mb/macos/Flutter/ephemeral/
+!chatbot_mb/.env
 
