@@ -27,86 +27,86 @@ def get_db_connection():
         return None
 
 def format_results(results, entity_type):
-    """Format database results into readable text"""
+    """Format database results into readable text as a list of messages"""
     if not results:
-        return "Xin lỗi, tôi không tìm thấy kết quả phù hợp. Bạn có thể thử tìm kiếm khác không?"
+        return ["Xin lỗi, tôi không tìm thấy kết quả phù hợp. Bạn có thể thử tìm kiếm khác không?"]
     
-    response = f"Tôi tìm thấy {len(results)} kết quả:\n\n"
+    messages = []
+    messages.append(f"Tôi tìm thấy {len(results)} kết quả:")
     
     for idx, item in enumerate(results[:5], 1):
+        msg = ""
         if entity_type == 'destination':
-            response += f"{idx}. 📍 {item['name']}"
+            msg += f"{idx}. 📍 {item['name']}"
             if item.get('province'):
-                response += f" - {item['province']}"
-            response += f"\n   ⭐ Đánh giá: {item.get('rating', 'N/A')}/5\n"
+                msg += f" - {item['province']}"
+            msg += f"\n   ⭐ Đánh giá: {item.get('rating', 'N/A')}/5\n"
             if item.get('category'):
-                response += f"   🏷️ Loại: {item['category']}\n"
+                msg += f"   🏷️ Loại: {item['category']}\n"
             if item.get('description'):
                 desc = item['description'][:100] + "..." if len(item['description']) > 100 else item['description']
-                response += f"   📝 {desc}\n"
-            response += "\n"
+                msg += f"   📝 {desc}\n"
         
         elif entity_type == 'hotel':
-            response += f"{idx}. 🏨 {item['name']}\n"
+            msg += f"{idx}. 🏨 {item['name']}\n"
             if item.get('address'):
-                response += f"   📍 {item['address']}\n"
+                msg += f"   📍 {item['address']}\n"
             if item.get('star_rating'):
-                response += f"   ⭐ {item['star_rating']} sao\n"
+                msg += f"   ⭐ {item['star_rating']} sao\n"
             if item.get('price_range'):
-                response += f"   💰 Giá: {item['price_range']}\n"
+                msg += f"   💰 Giá: {item['price_range']}\n"
             if item.get('amenities'):
                 try:
                     amenities = json.loads(item['amenities']) if isinstance(item['amenities'], str) else item['amenities']
                     if amenities and isinstance(amenities, list):
-                        response += f"   🎯 Tiện ích: {', '.join(amenities[:3])}\n"
+                        msg += f"   🎯 Tiện ích: {', '.join(amenities[:3])}\n"
                 except:
                     pass
-            response += "\n"
         
         elif entity_type == 'restaurant':
-            response += f"{idx}. 🍽️ {item['name']}\n"
+            msg += f"{idx}. 🍽️ {item['name']}\n"
             if item.get('cuisine_type'):
-                response += f"   🍜 Loại: {item['cuisine_type']}\n"
+                msg += f"   🍜 Loại: {item['cuisine_type']}\n"
             if item.get('price_range'):
-                response += f"   💰 Giá: {item['price_range']}\n"
+                msg += f"   💰 Giá: {item['price_range']}\n"
             if item.get('rating'):
-                response += f"   ⭐ Đánh giá: {item['rating']}/5\n"
+                msg += f"   ⭐ Đánh giá: {item['rating']}/5\n"
             if item.get('specialties'):
-                response += f"   🌟 Đặc sản: {item['specialties']}\n"
-            response += "\n"
+                msg += f"   🌟 Đặc sản: {item['specialties']}\n"
         
         elif entity_type == 'activity':
-            response += f"{idx}. 🎯 {item['name']}\n"
+            msg += f"{idx}. 🎯 {item['name']}\n"
             if item.get('type'):
-                response += f"   🏷️ Loại: {item['type']}\n"
+                msg += f"   🏷️ Loại: {item['type']}\n"
             if item.get('price'):
-                response += f"   💰 Giá: {item['price']:,} VNĐ\n"
+                msg += f"   💰 Giá: {item['price']:,} VNĐ\n"
             if item.get('duration'):
-                response += f"   ⏱️ Thời gian: {item['duration']}\n"
+                msg += f"   ⏱️ Thời gian: {item['duration']}\n"
             if item.get('description'):
                 desc = item['description'][:80] + "..." if len(item['description']) > 80 else item['description']
-                response += f"   📝 {desc}\n"
-            response += "\n"
+                msg += f"   📝 {desc}\n"
         
         elif entity_type == 'tour':
-            response += f"{idx}. 🎫 {item['name']}\n"
+            msg += f"{idx}. 🎫 {item['name']}\n"
             if item.get('duration_days'):
-                response += f"   📅 Thời gian: {item['duration_days']} ngày\n"
+                msg += f"   📅 Thời gian: {item['duration_days']} ngày\n"
             if item.get('price'):
-                response += f"   💰 Giá: {item['price']:,} VNĐ\n"
+                msg += f"   💰 Giá: {item['price']:,} VNĐ\n"
             if item.get('destinations'):
                 try:
                     dests = json.loads(item['destinations']) if isinstance(item['destinations'], str) else item['destinations']
                     if dests:
-                        response += f"   📍 Điểm đến: {', '.join(dests)}\n"
+                        msg += f"   📍 Điểm đến: {', '.join(dests)}\n"
                 except:
                     pass
-            response += "\n"
+        
+        if msg:
+            messages.append(msg)
     
     if len(results) > 5:
-        response += f"\n... và {len(results) - 5} kết quả khác.\n"
+        messages.append(f"... và {len(results) - 5} kết quả khác.")
     
-    return response
+    return messages
 
 class ActionSearchDestination(Action):
     def name(self) -> Text:
@@ -194,8 +194,9 @@ class ActionSearchDestination(Action):
             else:
                 print("   ⚠️  No results found!")
             
-            message = format_results(results, 'destination')
-            dispatcher.utter_message(text=message)
+            messages = format_results(results, 'destination')
+            for message in messages:
+                dispatcher.utter_message(text=message)
             
             print("\n✅ ACTION COMPLETED")
             print("="*80 + "\n")
@@ -263,16 +264,18 @@ class ActionSearchDestinationFuzzy(Action):
                 for r in results:
                     print(f"  - {r['name']} (similarity: {r['sim_score']:.2f})")
             
-            message = format_results(results, 'destination')
-            dispatcher.utter_message(text=message)
+            messages = format_results(results, 'destination')
+            for message in messages:
+                dispatcher.utter_message(text=message)
             
         except Exception as e:
             print(f"ERROR: {e}")
             query = "SELECT * FROM destinations WHERE LOWER(name) LIKE LOWER(%s) LIMIT 5"
             cur.execute(query, [f"%{destination}%"])
             results = cur.fetchall()
-            message = format_results(results, 'destination')
-            dispatcher.utter_message(text=message)
+            messages = format_results(results, 'destination')
+            for message in messages:
+                dispatcher.utter_message(text=message)
             
         finally:
             if cur:
@@ -329,24 +332,22 @@ class ActionSearchByCity(Action):
                 cat = r.get('category', 'khác')
                 categories[cat] = categories.get(cat, 0) + 1
             
-            response = f"Tìm thấy {len(results)} địa điểm ở {province}:\n\n"
-            
+            header = f"Tìm thấy {len(results)} địa điểm ở {province}:\n\n"
             for cat, count in categories.items():
-                response += f"- {cat.capitalize()}: {count} địa điểm\n"
-            
-            response += f"\nTop {min(5, len(results))} địa điểm được đánh giá cao nhất:\n\n"
+                header += f"- {cat.capitalize()}: {count} địa điểm\n"
+            dispatcher.utter_message(text=header)
+
+            dispatcher.utter_message(text=f"Top {min(5, len(results))} địa điểm được đánh giá cao nhất:")
             
             for idx, item in enumerate(results[:5], 1):
-                response += f"{idx}. {item['name']}"
+                item_msg = f"{idx}. {item['name']}"
                 if item.get('rating'):
-                    response += f" ({item['rating']}/5)"
-                response += f"\n   Loại: {item.get('category', 'N/A')}\n"
+                    item_msg += f" ({item['rating']}/5)"
+                item_msg += f"\n   Loại: {item.get('category', 'khác')}\n"
                 if item.get('description'):
-                    desc = item['description'][:80] + "..."
-                    response += f"   {desc}\n"
-                response += "\n"
-            
-            dispatcher.utter_message(text=response)
+                    desc = item['description'][:80] + "..." if len(item['description']) > 80 else item['description']
+                    item_msg += f"   {desc}"
+                dispatcher.utter_message(text=item_msg)
             
         except Exception as e:
             print(f"ERROR: {e}")
@@ -409,8 +410,9 @@ class ActionSearchHotel(Action):
             cur.execute(query, params)
             results = cur.fetchall()
             
-            message = format_results(results, 'hotel')
-            dispatcher.utter_message(text=message)
+            messages = format_results(results, 'hotel')
+            for message in messages:
+                dispatcher.utter_message(text=message)
             
         except Exception as e:
             logger.error(f"Error in ActionSearchHotel: {e}")
@@ -468,8 +470,9 @@ class ActionSearchRestaurant(Action):
             cur.execute(query, params)
             results = cur.fetchall()
             
-            message = format_results(results, 'restaurant')
-            dispatcher.utter_message(text=message)
+            messages = format_results(results, 'restaurant')
+            for message in messages:
+                dispatcher.utter_message(text=message)
             
         except Exception as e:
             logger.error(f"Error in ActionSearchRestaurant: {e}")
@@ -522,8 +525,9 @@ class ActionSearchActivity(Action):
             cur.execute(query, params)
             results = cur.fetchall()
             
-            message = format_results(results, 'activity')
-            dispatcher.utter_message(text=message)
+            messages = format_results(results, 'activity')
+            for message in messages:
+                dispatcher.utter_message(text=message)
             
         except Exception as e:
             logger.error(f"Error in ActionSearchActivity: {e}")
@@ -575,8 +579,9 @@ class ActionSearchTour(Action):
             cur.execute(query, params)
             results = cur.fetchall()
             
-            message = format_results(results, 'tour')
-            dispatcher.utter_message(text=message)
+            messages = format_results(results, 'tour')
+            for message in messages:
+                dispatcher.utter_message(text=message)
             
         except Exception as e:
             logger.error(f"Error in ActionSearchTour: {e}")

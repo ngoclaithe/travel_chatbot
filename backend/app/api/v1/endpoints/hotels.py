@@ -9,9 +9,9 @@ router = APIRouter()
 
 @router.post("/", response_model=dict, status_code=201)
 async def create_hotel(hotel: HotelCreate, db=Depends(get_db)):
-    query = hotels.insert().values(**hotel.model_dump())
+    query = hotels.insert().values(**hotel.dict())
     last_id = await db.execute(query)
-    return {**hotel.model_dump(), "id": last_id}
+    return {**hotel.dict(), "id": last_id}
 
 
 @router.get("/", response_model=List[dict])
@@ -32,7 +32,7 @@ async def get_hotel(hotel_id: int, db=Depends(get_db)):
 
 @router.put("/{hotel_id}", response_model=dict)
 async def update_hotel(hotel_id: int, hotel: HotelUpdate, db=Depends(get_db)):
-    update_data = {k: v for k, v in hotel.model_dump().items() if v is not None}
+    update_data = {k: v for k, v in hotel.dict(exclude_unset=True).items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields to update")
 

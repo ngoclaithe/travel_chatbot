@@ -11,6 +11,7 @@ class HotelBase(BaseModel):
     price_range: Optional[str] = None
     rating: Optional[Decimal] = 0
     amenities: Optional[List[str]] = None
+    image_url: Optional[str] = None
 
 class HotelCreate(HotelBase):
     pass
@@ -23,6 +24,7 @@ class HotelUpdate(BaseModel):
     price_range: Optional[str] = None
     rating: Optional[Decimal] = None
     amenities: Optional[List[str]] = None
+    image_url: Optional[str] = None
 
 class HotelResponse(HotelBase):
     id: int

@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Restaurant } from '@/types';
-import { Star, DollarSign, Utensils } from 'lucide-react';
+import { Star, Utensils } from 'lucide-react';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -19,6 +19,7 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
             src={restaurant.image_url}
             alt={restaurant.name}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover hover:scale-105 transition-transform"
           />
         </div>
@@ -44,11 +45,10 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
 
           <div className="flex items-center justify-between pt-2 border-t border-border">
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              Price Range:
+              Giá tham khảo:
             </span>
             <span className="flex items-center gap-1 font-semibold text-ocean-blue">
-              <DollarSign className="w-4 h-4" />
-              {restaurant.price_range}
+              {restaurant.price_range} VNĐ
             </span>
           </div>
         </div>

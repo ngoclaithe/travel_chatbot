@@ -19,6 +19,7 @@ export const DestinationCard: React.FC<DestinationCardProps> = ({ destination })
             src={destination.image_url}
             alt={destination.name}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover hover:scale-105 transition-transform"
           />
         </div>
@@ -44,7 +45,7 @@ export const DestinationCard: React.FC<DestinationCardProps> = ({ destination })
             <span className="text-sm font-semibold">{destination.rating}</span>
           </div>
           <span className="text-xs text-muted-foreground">
-            Best: {destination.best_time_to_visit}
+            Thời điểm đẹp nhất: {destination.best_time_to_visit}
           </span>
         </div>
       </CardContent>

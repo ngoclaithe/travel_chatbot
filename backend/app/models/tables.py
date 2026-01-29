@@ -13,6 +13,7 @@ destinations = sqlalchemy.Table(
     sqlalchemy.Column("rating", sqlalchemy.Numeric(2, 1), default=0),
     sqlalchemy.Column("description", sqlalchemy.Text),
     sqlalchemy.Column("best_time_to_visit", sqlalchemy.String(255)),
+    sqlalchemy.Column("image_url", sqlalchemy.String(500)),
     sqlalchemy.Column("created_at", sqlalchemy.DateTime, default=datetime.utcnow),
 )
 
@@ -40,6 +41,7 @@ hotels = sqlalchemy.Table(
     sqlalchemy.Column("price_range", sqlalchemy.String(50)),
     sqlalchemy.Column("rating", sqlalchemy.Numeric(2, 1), default=0),
     sqlalchemy.Column("amenities", sqlalchemy.ARRAY(sqlalchemy.Text)),
+    sqlalchemy.Column("image_url", sqlalchemy.String(500)),
     sqlalchemy.Column("created_at", sqlalchemy.DateTime, default=datetime.utcnow),
 )
 
@@ -53,6 +55,7 @@ restaurants = sqlalchemy.Table(
     sqlalchemy.Column("cuisine_type", sqlalchemy.String(100)),
     sqlalchemy.Column("price_range", sqlalchemy.String(50)),
     sqlalchemy.Column("rating", sqlalchemy.Numeric(2, 1), default=0),
+    sqlalchemy.Column("image_url", sqlalchemy.String(500)),
     sqlalchemy.Column("created_at", sqlalchemy.DateTime, default=datetime.utcnow),
 )
 
@@ -65,8 +68,10 @@ tours = sqlalchemy.Table(
     sqlalchemy.Column("duration_days", sqlalchemy.Integer),
     sqlalchemy.Column("price", sqlalchemy.Numeric(10, 2)),
     sqlalchemy.Column("description", sqlalchemy.Text),
+    sqlalchemy.Column("image_url", sqlalchemy.String(500)),
     sqlalchemy.Column("created_at", sqlalchemy.DateTime, default=datetime.utcnow),
 )
+
 
 transportation = sqlalchemy.Table(
     "transportation",

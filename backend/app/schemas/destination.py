@@ -11,6 +11,7 @@ class DestinationBase(BaseModel):
     rating: Optional[Decimal] = 0
     description: Optional[str] = None
     best_time_to_visit: Optional[str] = None
+    image_url: Optional[str] = None
 
 class DestinationCreate(DestinationBase):
     pass
@@ -23,6 +24,7 @@ class DestinationUpdate(BaseModel):
     rating: Optional[Decimal] = None
     description: Optional[str] = None
     best_time_to_visit: Optional[str] = None
+    image_url: Optional[str] = None
 
 class DestinationResponse(DestinationBase):
     id: int

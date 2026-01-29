@@ -15,7 +15,7 @@ export const useChat = () => {
   const setLoading = useChatStore((state) => state.setLoading);
   const setError = useChatStore((state) => state.setError);
   const clearMessages = useChatStore((state) => state.clearMessages);
-  
+
   const messages = useChatStore((state) => state.messages);
   const isLoading = useChatStore((state) => state.isLoading);
   const error = useChatStore((state) => state.error);
@@ -26,19 +26,13 @@ export const useChat = () => {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isConnectingRef = useRef<boolean>(false);
   const isMountedRef = useRef<boolean>(true);
-  const botResponseBufferRef = useRef<string>('');
-  const botResponseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const botResponseMetadataRef = useRef<{
-    intent?: string;
-    data?: unknown;
-  }>({}); 
 
   useEffect(() => {
     isMountedRef.current = true;
 
     const connectWebSocket = () => {
       if (!isMountedRef.current) return;
-      
+
       if (isConnectingRef.current || wsRef.current?.readyState === WebSocket.OPEN) {
         console.log('⏭️ Skipping connect - already connected or connecting');
         return;
@@ -59,7 +53,7 @@ export const useChat = () => {
             wsRef.current?.close();
             return;
           }
-          
+
           console.log('✅ WebSocket connected');
           reconnectAttemptsRef.current = 0;
           isConnectingRef.current = false;
@@ -90,33 +84,17 @@ export const useChat = () => {
             }
 
             if (message.type === 'message') {
-              
-              botResponseBufferRef.current += (message.content || '');
-              if (message.intent) {
-                botResponseMetadataRef.current.intent = message.intent;
-              }
-              if (message.data) {
-                botResponseMetadataRef.current.data = message.data;
-              }
-
-              if (botResponseTimeoutRef.current) {
-                clearTimeout(botResponseTimeoutRef.current);
-              }
-
-              botResponseTimeoutRef.current = setTimeout(() => {
-                if (botResponseBufferRef.current && isMountedRef.current) {
-                  const chatMessage: ChatMessage = {
-                    id: Date.now().toString(),
-                    sender: 'bot',
-                    content: botResponseBufferRef.current,
-                    timestamp: new Date().toISOString(),
-                    metadata: botResponseMetadataRef.current,
-                  };
-                  addMessage(chatMessage);
-                  botResponseBufferRef.current = '';
-                  botResponseMetadataRef.current = {};
-                }
-              }, 500);
+              const chatMessage: ChatMessage = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                sender: 'bot',
+                content: message.content || '',
+                timestamp: new Date().toISOString(),
+                metadata: {
+                  intent: message.intent,
+                  data: message.data,
+                },
+              };
+              addMessage(chatMessage);
             }
           } catch (error) {
             console.error('Error parsing WebSocket message:', error);
@@ -175,17 +153,12 @@ export const useChat = () => {
         reconnectTimeoutRef.current = null;
       }
 
-      if (botResponseTimeoutRef.current) {
-        clearTimeout(botResponseTimeoutRef.current);
-        botResponseTimeoutRef.current = null;
-      }
-
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;
       }
     };
-  }, [addMessage, setError, setLoading]); 
+  }, [addMessage, setError, setLoading]);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -233,7 +206,7 @@ export const useChat = () => {
         setLoading(false);
       }
     },
-    [addMessage, setError, setLoading] 
+    [addMessage, setError, setLoading]
   );
 
   return {

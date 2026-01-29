@@ -9,6 +9,7 @@ class TourBase(BaseModel):
     duration_days: Optional[int] = None
     price: Optional[Decimal] = None
     description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class TourCreate(TourBase):
     pass
@@ -19,6 +20,7 @@ class TourUpdate(BaseModel):
     duration_days: Optional[int] = None
     price: Optional[Decimal] = None
     description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class TourResponse(TourBase):
     id: int

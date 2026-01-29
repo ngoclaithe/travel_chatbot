@@ -10,6 +10,7 @@ class RestaurantBase(BaseModel):
     cuisine_type: Optional[str] = None
     price_range: Optional[str] = None
     rating: Optional[Decimal] = 0
+    image_url: Optional[str] = None
 
 class RestaurantCreate(RestaurantBase):
     pass
@@ -21,6 +22,7 @@ class RestaurantUpdate(BaseModel):
     cuisine_type: Optional[str] = None
     price_range: Optional[str] = None
     rating: Optional[Decimal] = None
+    image_url: Optional[str] = None
 
 class RestaurantResponse(RestaurantBase):
     id: int

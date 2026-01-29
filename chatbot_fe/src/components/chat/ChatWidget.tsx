@@ -33,7 +33,7 @@ export const ChatWidget: React.FC = () => {
       <div className="flex items-center justify-between p-4 border-b border-border bg-ocean-blue text-white rounded-t-lg">
         <div>
           <h3 className="font-semibold text-lg">Travelbot</h3>
-          <p className="text-xs opacity-80">Always here to help</p>
+          <p className="text-xs opacity-80">Luôn sẵn sàng hỗ trợ bạn</p>
         </div>
         <button
           onClick={closeChat}
@@ -49,7 +49,7 @@ export const ChatWidget: React.FC = () => {
           <div className="h-full flex flex-col items-center justify-center text-center">
             <MessageCircle className="w-12 h-12 text-muted-foreground mb-3 opacity-50" />
             <p className="text-muted-foreground">
-              Hi! How can we help you today?
+              Xin chào! Chúng tôi có thể giúp gì cho bạn?
             </p>
           </div>
         ) : (

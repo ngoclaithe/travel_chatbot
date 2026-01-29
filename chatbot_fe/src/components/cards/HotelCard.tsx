@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Hotel } from '@/types';
-import { Star, DollarSign } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 interface HotelCardProps {
   hotel: Hotel;
@@ -19,6 +19,7 @@ export const HotelCard: React.FC<HotelCardProps> = ({ hotel }) => {
             src={hotel.image_url}
             alt={hotel.name}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover hover:scale-105 transition-transform"
           />
         </div>
@@ -39,11 +40,10 @@ export const HotelCard: React.FC<HotelCardProps> = ({ hotel }) => {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              Price Range:
+              Giá tham khảo:
             </span>
             <span className="flex items-center gap-1 font-semibold text-ocean-blue">
-              <DollarSign className="w-4 h-4" />
-              {hotel.price_range}
+              {hotel.price_range} VNĐ
             </span>
           </div>
 

@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tour } from '@/types';
-import { MapPin, Calendar, DollarSign } from 'lucide-react';
+import { MapPin, Calendar } from 'lucide-react';
 
 interface TourCardProps {
   tour: Tour;
@@ -37,6 +37,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour }) => {
             src={tour.image_url}
             alt={tour.name}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover hover:scale-105 transition-transform"
           />
         </div>
@@ -68,8 +69,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour }) => {
               Giá mỗi người:
             </span>
             <span className="flex items-center gap-1 font-semibold text-sand-yellow text-lg">
-              <DollarSign className="w-4 h-4" />
-              {tour.price ?? 'Liên hệ'}
+              {tour.price ? `${Number(tour.price).toLocaleString('vi-VN')} VNĐ` : 'Liên hệ'}
             </span>
           </div>
         </div>
