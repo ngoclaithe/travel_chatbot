@@ -1,19 +1,110 @@
-/.rasa
-/.venv
-# /models
+# ========================
+# General / OS / IDE
+# ========================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Ignore Python cache
+# Python common
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# ------------------------
-# Ignore Flutter project travelbotmb
-travelbotmb/.dart_tool/
-travelbotmb/.packages
-travelbotmb/build/
-travelbotmb/.flutter-plugins
-travelbotmb/.flutter-plugins-dependencies
-travelbotmb/pubspec.lock
-travelbotmb/.idea/
-travelbotmb/.vscode/
+# ========================
+# Root (Rasa)
+# ========================
+.rasa/
+models/*.tar.gz
+# Include models if you want to ship them, but usually they are ignored
+results/
+reports/
+.venv/
+venv/
+*.db
+endpoints.yml.bk
+credentials.yml.bk
+
+# ========================
+# Backend (Python)
+# ========================
+backend/venv/
+backend/.venv/
+backend/.env
+backend/instance/
+backend/.pytest_cache/
+backend/coverage/
+backend/htmlcov/
+backend/*.db
+
+# ========================
+# Frontend (Next.js) - chatbot_fe/travelbotvn29
+# ========================
+chatbot_fe/travelbotvn29/.next/
+chatbot_fe/travelbotvn29/out/
+chatbot_fe/travelbotvn29/build/
+chatbot_fe/travelbotvn29/node_modules/
+chatbot_fe/travelbotvn29/.env
+chatbot_fe/travelbotvn29/.env.local
+chatbot_fe/travelbotvn29/.env.development.local
+chatbot_fe/travelbotvn29/.env.test.local
+chatbot_fe/travelbotvn29/.env.production.local
+chatbot_fe/travelbotvn29/coverage/
+
+# ========================
+# Mobile (Flutter) - chatbot_mb
+# ========================
+chatbot_mb/.dart_tool/
+chatbot_mb/.packages
+chatbot_mb/.pub/
+chatbot_mb/build/
+# Symlinks for local plugins
+chatbot_mb/.flutter-plugins
+chatbot_mb/.flutter-plugins-dependencies
+# Android
+chatbot_mb/android/.gradle
+chatbot_mb/android/local.properties
+chatbot_mb/android/key.properties
+chatbot_mb/android/app/src/main/assets/
+# iOS
+chatbot_mb/ios/Flutter/Generated.xcconfig
+chatbot_mb/ios/Flutter/app.flx
+chatbot_mb/ios/Flutter/gen_snapshot_resources
+chatbot_mb/ios/.generated/
+chatbot_mb/ios/Podfile.lock
+chatbot_mb/ios/Pods/
+# Windows/Linux/Mac
+chatbot_mb/windows/flutter/ephemeral/
+chatbot_mb/linux/flutter/ephemeral/
+chatbot_mb/macos/Flutter/ephemeral/
+
