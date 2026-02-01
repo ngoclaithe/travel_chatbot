@@ -11,28 +11,28 @@ import { z } from 'zod';
 
 const reviewSchema = z.object({
   entity_type: z.enum(['destination', 'hotel', 'restaurant', 'tour']),
-  entity_id: z.string().min(1, 'Entity ID is required'),
-  rating: z.coerce.number().min(0).max(5, 'Rating must be between 0 and 5'),
-  comment: z.string().min(5, 'Comment must be at least 5 characters'),
+  entity_id: z.string().min(1, 'ID thực thể là bắt buộc'),
+  rating: z.coerce.number().min(0).max(5, 'Đánh giá phải từ 0 đến 5'),
+  comment: z.string().min(5, 'Bình luận phải có ít nhất 5 ký tự'),
   author: z.string().optional(),
 });
 
 type ReviewFormData = z.infer<typeof reviewSchema>;
 
 const columns: ColumnDef<Review>[] = [
-  { key: 'entity_type', label: 'Type' },
-  { key: 'entity_id', label: 'Entity ID' },
+  { key: 'entity_type', label: 'Loại' },
+  { key: 'entity_id', label: 'ID Thực Thể' },
   {
     key: 'rating',
-    label: 'Rating',
+    label: 'Đánh Giá',
     render: (value) => `${value}/5`,
   },
   {
     key: 'comment',
-    label: 'Comment',
+    label: 'Bình Luận',
     render: (value) => String(value).substring(0, 50) + '...',
   },
-  { key: 'author', label: 'Author' },
+  { key: 'author', label: 'Tác Giả' },
 ];
 
 export default function ReviewsPage() {
@@ -62,11 +62,11 @@ export default function ReviewsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa không?')) return;
     setDeletingId(id);
     const success = await deleteItem(id);
     if (!success) {
-      setSubmitError('Failed to delete');
+      setSubmitError('Xóa thất bại');
     }
     setDeletingId(null);
   };
@@ -85,7 +85,7 @@ export default function ReviewsPage() {
       setIsDialogOpen(false);
       setEditingItem(null);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to save');
+      setSubmitError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setIsSubmitting(false);
     }
@@ -94,7 +94,7 @@ export default function ReviewsPage() {
   const formFields = [
     {
       name: 'entity_type',
-      label: 'Entity Type',
+      label: 'Loại Thực Thể',
       type: 'select' as const,
       options: [
         { value: 'destination', label: 'Destination' },
@@ -106,28 +106,28 @@ export default function ReviewsPage() {
     },
     {
       name: 'entity_id',
-      label: 'Entity ID',
-      placeholder: 'ID of the entity being reviewed',
+      label: 'ID Thực Thể',
+      placeholder: 'ID của thực thể được đánh giá',
       required: true,
     },
     {
       name: 'rating',
-      label: 'Rating (0-5)',
+      label: 'Đánh Giá (0-5)',
       type: 'number' as const,
       placeholder: '4',
       required: true,
     },
     {
       name: 'comment',
-      label: 'Review Comment',
+      label: 'Bình Luận',
       type: 'textarea' as const,
-      placeholder: 'Write your review...',
+      placeholder: 'Viết đánh giá của bạn...',
       required: true,
     },
     {
       name: 'author',
-      label: 'Author Name (optional)',
-      placeholder: 'Anonymous',
+      label: 'Tên Tác Giả (tùy chọn)',
+      placeholder: 'Ẩn danh',
       required: false,
     },
   ];
@@ -137,15 +137,15 @@ export default function ReviewsPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Manage Reviews
+            Quản Lý Đánh Giá
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Create, read, update, and delete reviews
+            Tạo, xem, cập nhật và xóa đánh giá
           </p>
         </div>
 
         <DataTable
-          title="Reviews"
+          title="Danh Sách Đánh Giá"
           columns={columns}
           data={data}
           isLoading={isLoading}
@@ -161,7 +161,7 @@ export default function ReviewsPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'Edit Review' : 'Add New Review'}
+              {editingItem ? 'Chỉnh Sửa Đánh Giá' : 'Thêm Đánh Giá Mới'}
             </DialogTitle>
           </DialogHeader>
 

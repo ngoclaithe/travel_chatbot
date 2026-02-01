@@ -10,24 +10,24 @@ import { Activity } from '@/types';
 import { z } from 'zod';
 
 const activitySchema = z.object({
-  type: z.string().min(2, 'Type is required'),
-  price: z.coerce.number().min(0, 'Price must be positive'),
-  duration: z.string().min(2, 'Duration is required'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
+  type: z.string().min(2, 'Loại hoạt động bắt buộc'),
+  price: z.coerce.number().min(0, 'Giá phải là số dương'),
+  duration: z.string().min(2, 'Thời lượng bắt buộc'),
+  description: z.string().min(10, 'Mô tả phải có ít nhất 10 ký tự'),
   destination_id: z.string().optional(),
-  image_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  image_url: z.string().url('Phải là URL hợp lệ').optional().or(z.literal('')),
 });
 
 type ActivityFormData = z.infer<typeof activitySchema>;
 
 const columns: ColumnDef<Activity>[] = [
-  { key: 'type', label: 'Activity Type' },
+  { key: 'type', label: 'Loại Hoạt Động' },
   {
     key: 'price',
-    label: 'Price',
+    label: 'Giá',
     render: (value) => `$${value}`,
   },
-  { key: 'duration', label: 'Duration' },
+  { key: 'duration', label: 'Thời Lượng' },
 ];
 
 export default function ActivitiesPage() {
@@ -57,11 +57,11 @@ export default function ActivitiesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this activity?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa hoạt động này không?')) return;
     setDeletingId(id);
     const success = await deleteItem(id);
     if (!success) {
-      setSubmitError('Failed to delete activity');
+      setSubmitError('Xóa hoạt động thất bại');
     }
     setDeletingId(null);
   };
@@ -80,7 +80,7 @@ export default function ActivitiesPage() {
       setIsDialogOpen(false);
       setEditingItem(null);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to save');
+      setSubmitError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setIsSubmitting(false);
     }
@@ -89,40 +89,40 @@ export default function ActivitiesPage() {
   const formFields = [
     {
       name: 'type',
-      label: 'Activity Type',
-      placeholder: 'e.g., Scuba Diving, Hiking',
+      label: 'Loại Hoạt Động',
+      placeholder: 'ví dụ: Lặn Biển, Leo Núi',
       required: true,
     },
     {
       name: 'price',
-      label: 'Price',
+      label: 'Giá',
       type: 'number' as const,
       placeholder: '50',
       required: true,
     },
     {
       name: 'duration',
-      label: 'Duration',
-      placeholder: 'e.g., 2 hours, Full day',
+      label: 'Thời Lượng',
+      placeholder: 'ví dụ: 2 giờ, Cả ngày',
       required: true,
     },
     {
       name: 'description',
-      label: 'Description',
+      label: 'Mô Tả',
       type: 'textarea' as const,
-      placeholder: 'Describe this activity...',
+      placeholder: 'Mô tả hoạt động này...',
       required: true,
     },
     {
       name: 'destination_id',
-      label: 'Destination ID (optional)',
-      placeholder: 'Activity destination ID',
+      label: 'ID Điểm Đến (tùy chọn)',
+      placeholder: 'ID điểm đến',
       required: false,
     },
     {
       name: 'image_url',
-      label: 'Image URL',
-      placeholder: 'https://...',
+      label: 'Hình Ảnh',
+      type: 'image' as const,
       required: false,
     },
   ];
@@ -132,15 +132,15 @@ export default function ActivitiesPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Manage Activities
+            Quản Lý Hoạt Động
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Create, read, update, and delete travel activities
+            Tạo, xem, cập nhật và xóa các hoạt động du lịch
           </p>
         </div>
 
         <DataTable
-          title="Activities"
+          title="Danh Sách Hoạt Động"
           columns={columns}
           data={data}
           isLoading={isLoading}
@@ -156,7 +156,7 @@ export default function ActivitiesPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'Edit Activity' : 'Add New Activity'}
+              {editingItem ? 'Chỉnh Sửa Hoạt Động' : 'Thêm Hoạt Động Mới'}
             </DialogTitle>
           </DialogHeader>
 

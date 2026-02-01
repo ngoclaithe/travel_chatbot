@@ -10,35 +10,35 @@ import { Weather } from '@/types';
 import { z } from 'zod';
 
 const weatherSchema = z.object({
-  destination_id: z.string().min(1, 'Destination is required'),
-  month: z.coerce.number().min(1).max(12, 'Month must be between 1 and 12'),
-  avg_temp: z.coerce.number().min(-50).max(60, 'Temperature must be realistic'),
-  description: z.string().min(5, 'Description is required'),
+  destination_id: z.string().min(1, 'Điểm đến là bắt buộc'),
+  month: z.coerce.number().min(1).max(12, 'Tháng phải từ 1 đến 12'),
+  avg_temp: z.coerce.number().min(-50).max(60, 'Nhiệt độ không hợp lệ'),
+  description: z.string().min(5, 'Mô tả là bắt buộc'),
   is_best_time: z.boolean().default(false),
 });
 
 type WeatherFormData = z.infer<typeof weatherSchema>;
 
 const columns: ColumnDef<Weather>[] = [
-  { key: 'destination_id', label: 'Destination' },
+  { key: 'destination_id', label: 'Điểm Đến' },
   {
     key: 'month',
-    label: 'Month',
+    label: 'Tháng',
     render: (value) => {
       const monthNum = Number(value);
       if (!monthNum || monthNum < 1 || monthNum > 12) return String(value);
-      return new Date(2024, monthNum - 1).toLocaleDateString('en-US', { month: 'long' });
+      return `Tháng ${monthNum}`;
     },
   },
   {
     key: 'avg_temp',
-    label: 'Avg Temp',
+    label: 'Nhiệt Độ TB',
     render: (value) => `${value}°C`,
   },
   {
     key: 'is_best_time',
-    label: 'Best Time',
-    render: (value) => (value ? '✓ Yes' : 'No'),
+    label: 'Thời Điểm Tốt Nhất',
+    render: (value) => (value ? '✓ Có' : 'Không'),
   },
 ];
 
@@ -69,11 +69,11 @@ export default function WeatherPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa không?')) return;
     setDeletingId(id);
     const success = await deleteItem(id);
     if (!success) {
-      setSubmitError('Failed to delete');
+      setSubmitError('Xóa thất bại');
     }
     setDeletingId(null);
   };
@@ -92,7 +92,7 @@ export default function WeatherPage() {
       setIsDialogOpen(false);
       setEditingItem(null);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to save');
+      setSubmitError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setIsSubmitting(false);
     }
@@ -101,34 +101,34 @@ export default function WeatherPage() {
   const formFields = [
     {
       name: 'destination_id',
-      label: 'Destination ID',
-      placeholder: 'Destination ID',
+      label: 'ID Điểm Đến',
+      placeholder: 'ID Điểm Đến',
       required: true,
     },
     {
       name: 'month',
-      label: 'Month (1-12)',
+      label: 'Tháng (1-12)',
       type: 'number' as const,
       placeholder: '1',
       required: true,
     },
     {
       name: 'avg_temp',
-      label: 'Average Temperature (°C)',
+      label: 'Nhiệt Độ Trung Bình (°C)',
       type: 'number' as const,
       placeholder: '25',
       required: true,
     },
     {
       name: 'description',
-      label: 'Weather Description',
+      label: 'Mô Tả Thời Tiết',
       type: 'textarea' as const,
-      placeholder: 'Sunny and warm...',
+      placeholder: 'Nắng ấm...',
       required: true,
     },
     {
       name: 'is_best_time',
-      label: 'Best Time to Visit',
+      label: 'Thời Điểm Tốt Nhất Để Thăm',
       type: 'checkbox' as const,
     },
   ];
@@ -150,15 +150,15 @@ export default function WeatherPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Manage Weather
+            Quản Lý Thời Tiết
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Weather information by destination and month
+            Thông tin thời tiết theo điểm đến và tháng
           </p>
         </div>
 
         <DataTable
-          title="Weather Data"
+          title="Danh Sách Thời Tiết"
           columns={columns}
           data={data}
           isLoading={isLoading}
@@ -174,7 +174,7 @@ export default function WeatherPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'Edit Weather' : 'Add Weather Data'}
+              {editingItem ? 'Chỉnh Sửa Thời Tiết' : 'Thêm Dữ Liệu Thời Tiết'}
             </DialogTitle>
           </DialogHeader>
 

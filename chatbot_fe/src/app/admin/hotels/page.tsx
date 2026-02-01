@@ -22,17 +22,22 @@ const hotelSchema = z.object({
 type HotelFormData = z.infer<typeof hotelSchema>;
 
 const columns: ColumnDef<Hotel>[] = [
-  { key: 'name', label: 'Hotel Name' },
-  { key: 'destination_id', label: 'Destination' },
+  { key: 'name', label: 'Tên Khách Sạn' },
+  {
+    key: 'image_url',
+    label: 'Hình Ảnh',
+    render: (value) => value ? <img src={value as string} alt="Hotel" className="w-16 h-10 object-cover rounded" /> : null
+  },
+  { key: 'destination_id', label: 'Điểm Đến' },
   {
     key: 'star_rating',
-    label: 'Stars',
+    label: 'Hạng Sao',
     render: (value) => `${'⭐'.repeat(Number(value) || 0)}`,
   },
-  { key: 'price_range', label: 'Price Range' },
+  { key: 'price_range', label: 'Khoảng Giá' },
   {
     key: 'rating',
-    label: 'Rating',
+    label: 'Đánh Giá',
     render: (value) => `${value}/5`,
   },
 ];
@@ -64,11 +69,11 @@ export default function HotelsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this hotel?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa khách sạn này không?')) return;
     setDeletingId(id);
     const success = await deleteItem(id);
     if (!success) {
-      setSubmitError('Failed to delete hotel');
+      setSubmitError('Xóa khách sạn thất bại');
     }
     setDeletingId(null);
   };
@@ -91,7 +96,7 @@ export default function HotelsPage() {
       setIsDialogOpen(false);
       setEditingItem(null);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to save');
+      setSubmitError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setIsSubmitting(false);
     }
@@ -100,58 +105,58 @@ export default function HotelsPage() {
   const formFields = [
     {
       name: 'name',
-      label: 'Hotel Name',
-      placeholder: 'e.g., Grand Hotel Paris',
+      label: 'Tên Khách Sạn',
+      placeholder: 'ví dụ: Grand Hotel Paris',
       required: true,
     },
     {
       name: 'destination_id',
-      label: 'Destination ID',
-      placeholder: 'Hotel destination ID',
+      label: 'ID Điểm Đến',
+      placeholder: 'ID điểm đến của khách sạn',
       required: true,
     },
     {
       name: 'star_rating',
-      label: 'Star Rating (1-5)',
+      label: 'Hạng Sao (1-5)',
       type: 'number' as const,
       placeholder: '4',
       required: true,
     },
     {
       name: 'price_range',
-      label: 'Price Range',
+      label: 'Khoảng Giá',
       placeholder: '$$$',
       required: true,
     },
     {
       name: 'rating',
-      label: 'Rating (0-5)',
+      label: 'Đánh Giá (0-5)',
       type: 'number' as const,
       placeholder: '4.5',
       required: true,
     },
     {
       name: 'amenities',
-      label: 'Amenities (comma separated)',
+      label: 'Tiện Nghi (phân cách bằng dấu phẩy)',
       type: 'textarea' as const,
-      placeholder: 'WiFi, Pool, Gym, Restaurant',
+      placeholder: 'WiFi, Hồ bơi, Gym, Nhà hàng',
       required: false,
     },
     {
       name: 'image_url',
-      label: 'Image URL',
-      placeholder: 'https://...',
+      label: 'Hình Ảnh',
+      type: 'image' as const,
       required: false,
     },
   ];
 
   const getDefaultValues = (hotel: Hotel | null) => {
     if (!hotel) return undefined;
-    
+
     return {
       ...hotel,
-      amenities: Array.isArray(hotel.amenities) 
-        ? hotel.amenities.join(', ') 
+      amenities: Array.isArray(hotel.amenities)
+        ? hotel.amenities.join(', ')
         : hotel.amenities || '',
     };
   };
@@ -161,15 +166,15 @@ export default function HotelsPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Manage Hotels
+            Quản Lý Khách Sạn
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Create, read, update, and delete hotel listings
+            Tạo, xem, cập nhật và xóa các khách sạn
           </p>
         </div>
 
         <DataTable
-          title="Hotels"
+          title="Danh Sách Khách Sạn"
           columns={columns}
           data={data}
           isLoading={isLoading}
@@ -183,10 +188,10 @@ export default function HotelsPage() {
 
       {/* Form Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'Edit Hotel' : 'Add New Hotel'}
+              {editingItem ? 'Chỉnh Sửa Khách Sạn' : 'Thêm Khách Sạn Mới'}
             </DialogTitle>
           </DialogHeader>
 

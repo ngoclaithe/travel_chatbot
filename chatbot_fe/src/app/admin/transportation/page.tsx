@@ -10,21 +10,21 @@ import { Transportation } from '@/types';
 import { z } from 'zod';
 
 const transportationSchema = z.object({
-  from_destination: z.string().min(1, 'From destination is required'),
-  to_destination: z.string().min(1, 'To destination is required'),
-  type: z.string().min(2, 'Transport type is required'),
-  duration: z.string().min(2, 'Duration is required'),
-  price_range: z.string().min(1, 'Price range is required'),
+  from_destination: z.string().min(1, 'Điểm đi là bắt buộc'),
+  to_destination: z.string().min(1, 'Điểm đến là bắt buộc'),
+  type: z.string().min(2, 'Loại phương tiện là bắt buộc'),
+  duration: z.string().min(2, 'Thời gian là bắt buộc'),
+  price_range: z.string().min(1, 'Khoảng giá là bắt buộc'),
 });
 
 type TransportationFormData = z.infer<typeof transportationSchema>;
 
 const columns: ColumnDef<Transportation>[] = [
-  { key: 'from_destination', label: 'From' },
-  { key: 'to_destination', label: 'To' },
-  { key: 'type', label: 'Type' },
-  { key: 'duration', label: 'Duration' },
-  { key: 'price_range', label: 'Price Range' },
+  { key: 'from_destination', label: 'Từ' },
+  { key: 'to_destination', label: 'Đến' },
+  { key: 'type', label: 'Loại' },
+  { key: 'duration', label: 'Thời Gian' },
+  { key: 'price_range', label: 'Khoảng Giá' },
 ];
 
 export default function TransportationPage() {
@@ -54,11 +54,11 @@ export default function TransportationPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa không?')) return;
     setDeletingId(id);
     const success = await deleteItem(id);
     if (!success) {
-      setSubmitError('Failed to delete');
+      setSubmitError('Xóa thất bại');
     }
     setDeletingId(null);
   };
@@ -77,7 +77,7 @@ export default function TransportationPage() {
       setIsDialogOpen(false);
       setEditingItem(null);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to save');
+      setSubmitError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setIsSubmitting(false);
     }
@@ -86,31 +86,31 @@ export default function TransportationPage() {
   const formFields = [
     {
       name: 'from_destination',
-      label: 'From Destination',
-      placeholder: 'e.g., Bangkok',
+      label: 'Điểm Đi',
+      placeholder: 'ví dụ: Bangkok',
       required: true,
     },
     {
       name: 'to_destination',
-      label: 'To Destination',
-      placeholder: 'e.g., Phuket',
+      label: 'Điểm Đến',
+      placeholder: 'ví dụ: Phuket',
       required: true,
     },
     {
       name: 'type',
-      label: 'Transport Type',
-      placeholder: 'e.g., Flight, Bus, Train',
+      label: 'Loại Phương Tiện',
+      placeholder: 'ví dụ: Máy bay, Xe buýt',
       required: true,
     },
     {
       name: 'duration',
-      label: 'Duration',
-      placeholder: 'e.g., 2 hours',
+      label: 'Thời Gian',
+      placeholder: 'ví dụ: 2 giờ',
       required: true,
     },
     {
       name: 'price_range',
-      label: 'Price Range',
+      label: 'Khoảng Giá',
       placeholder: '$$',
       required: true,
     },
@@ -121,15 +121,15 @@ export default function TransportationPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Manage Transportation
+            Quản Lý Vận Chuyển
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Transportation options between destinations
+            Các lựa chọn vận chuyển giữa các điểm đến
           </p>
         </div>
 
         <DataTable
-          title="Transportation Routes"
+          title="Các Tuyến Vận Chuyển"
           columns={columns}
           data={data}
           isLoading={isLoading}
@@ -145,7 +145,7 @@ export default function TransportationPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'Edit Route' : 'Add Transportation Route'}
+              {editingItem ? 'Chỉnh Sửa Tuyến' : 'Thêm Tuyến Vận Chuyển'}
             </DialogTitle>
           </DialogHeader>
 

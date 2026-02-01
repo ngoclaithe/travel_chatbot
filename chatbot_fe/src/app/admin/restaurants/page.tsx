@@ -10,24 +10,29 @@ import { Restaurant } from '@/types';
 import { z } from 'zod';
 
 const restaurantSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  destination_id: z.string().min(1, 'Destination is required'),
-  cuisine_type: z.string().min(2, 'Cuisine type is required'),
-  price_range: z.string().min(1, 'Price range is required'),
-  rating: z.coerce.number().min(0).max(5, 'Rating must be between 0 and 5'),
-  image_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  name: z.string().min(2, 'Tên phải có ít nhất 2 ký tự'),
+  destination_id: z.string().min(1, 'Điểm đến là bắt buộc'),
+  cuisine_type: z.string().min(2, 'Loại ẩm thực là bắt buộc'),
+  price_range: z.string().min(1, 'Khoảng giá là bắt buộc'),
+  rating: z.coerce.number().min(0).max(5, 'Đánh giá phải từ 0 đến 5'),
+  image_url: z.string().url('Phải là URL hợp lệ').optional().or(z.literal('')),
 });
 
 type RestaurantFormData = z.infer<typeof restaurantSchema>;
 
 const columns: ColumnDef<Restaurant>[] = [
-  { key: 'name', label: 'Restaurant Name' },
-  { key: 'destination_id', label: 'Destination' },
-  { key: 'cuisine_type', label: 'Cuisine Type' },
-  { key: 'price_range', label: 'Price Range' },
+  { key: 'name', label: 'Tên Nhà Hàng' },
+  {
+    key: 'image_url',
+    label: 'Hình Ảnh',
+    render: (value) => value ? <img src={value as string} alt="Restaurant" className="w-16 h-10 object-cover rounded" /> : null
+  },
+  { key: 'destination_id', label: 'Điểm Đến' },
+  { key: 'cuisine_type', label: 'Loại Ẩm Thực' },
+  { key: 'price_range', label: 'Khoảng Giá' },
   {
     key: 'rating',
-    label: 'Rating',
+    label: 'Đánh Giá',
     render: (value) => `${value}/5`,
   },
 ];
@@ -59,11 +64,11 @@ export default function RestaurantsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this restaurant?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa nhà hàng này không?')) return;
     setDeletingId(id);
     const success = await deleteItem(id);
     if (!success) {
-      setSubmitError('Failed to delete restaurant');
+      setSubmitError('Xóa nhà hàng thất bại');
     }
     setDeletingId(null);
   };
@@ -82,7 +87,7 @@ export default function RestaurantsPage() {
       setIsDialogOpen(false);
       setEditingItem(null);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to save');
+      setSubmitError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setIsSubmitting(false);
     }
@@ -91,39 +96,39 @@ export default function RestaurantsPage() {
   const formFields = [
     {
       name: 'name',
-      label: 'Restaurant Name',
-      placeholder: 'e.g., La Belle Vie',
+      label: 'Tên Nhà Hàng',
+      placeholder: 'ví dụ: La Belle Vie',
       required: true,
     },
     {
       name: 'destination_id',
-      label: 'Destination ID',
-      placeholder: 'Restaurant destination ID',
+      label: 'ID Điểm Đến',
+      placeholder: 'ID điểm đến của nhà hàng',
       required: true,
     },
     {
       name: 'cuisine_type',
-      label: 'Cuisine Type',
-      placeholder: 'e.g., French, Italian, Thai',
+      label: 'Loại Ẩm Thực',
+      placeholder: 'ví dụ: Pháp, Ý, Thái',
       required: true,
     },
     {
       name: 'price_range',
-      label: 'Price Range',
+      label: 'Khoảng Giá',
       placeholder: '$$',
       required: true,
     },
     {
       name: 'rating',
-      label: 'Rating (0-5)',
+      label: 'Đánh Giá (0-5)',
       type: 'number' as const,
       placeholder: '4.5',
       required: true,
     },
     {
       name: 'image_url',
-      label: 'Image URL',
-      placeholder: 'https://...',
+      label: 'Hình Ảnh',
+      type: 'image' as const,
       required: false,
     },
   ];
@@ -133,15 +138,15 @@ export default function RestaurantsPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Manage Restaurants
+            Quản Lý Nhà Hàng
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Create, read, update, and delete restaurant listings
+            Tạo, xem, cập nhật và xóa các nhà hàng
           </p>
         </div>
 
         <DataTable
-          title="Restaurants"
+          title="Danh Sách Nhà Hàng"
           columns={columns}
           data={data}
           isLoading={isLoading}
@@ -155,10 +160,10 @@ export default function RestaurantsPage() {
 
       {/* Form Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'Edit Restaurant' : 'Add New Restaurant'}
+              {editingItem ? 'Chỉnh Sửa Nhà Hàng' : 'Thêm Nhà Hàng Mới'}
             </DialogTitle>
           </DialogHeader>
 

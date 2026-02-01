@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Navigation } from "@/components/layout/Navigation";
-import { Footer } from "@/components/layout/Footer";
-import { ChatWidget } from "@/components/chat/ChatWidget";
+import { ClientLayout } from "@/components/layout/ClientLayout";
 
 export const metadata: Metadata = {
   title: "Travelbot - AI Travel Assistant",
@@ -17,12 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Navigation />
-        <main className="min-h-screen">
+        <ClientLayout>
           {children}
-        </main>
-        <Footer />
-        <ChatWidget />
+        </ClientLayout>
       </body>
     </html>
   );

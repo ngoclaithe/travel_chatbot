@@ -1,15 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.database import connect_db, disconnect_db
 from app.api.v1.router import api_router
 from app.services.websocket_service import router as ws_router
+import os
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_PREFIX}/openapi.json"
 )
 
+# Ensure static directory exists
+os.makedirs("static/uploads", exist_ok=True)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 origins = [
     "https://travelbotvn29.vercel.app", 

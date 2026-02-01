@@ -21,6 +21,7 @@ export const HotelCard: React.FC<HotelCardProps> = ({ hotel }) => {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover hover:scale-105 transition-transform"
+            unoptimized
           />
         </div>
       )}
@@ -47,28 +48,75 @@ export const HotelCard: React.FC<HotelCardProps> = ({ hotel }) => {
             </span>
           </div>
 
-          {hotel.amenities && hotel.amenities.length > 0 && (
-            <div className="pt-2 border-t border-border">
-              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Amenities:
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {hotel.amenities.slice(0, 3).map((amenity) => (
-                  <span
-                    key={amenity}
-                    className="text-xs bg-ocean-light/10 text-ocean-blue px-2 py-1 rounded"
-                  >
-                    {amenity}
-                  </span>
-                ))}
-                {hotel.amenities.length > 3 && (
-                  <span className="text-xs text-muted-foreground px-2 py-1">
-                    +{hotel.amenities.length - 3} more
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
+          {(() => {
+            let amenitiesList: string[] = [];
+
+            const parseItem = (item: any): string[] => {
+              if (!item) return [];
+              if (typeof item !== 'string') return [String(item)];
+
+              const trimmed = item.trim();
+
+              // Try JSON Array
+              if (trimmed.startsWith('[')) {
+                try {
+                  const parsed = JSON.parse(trimmed);
+                  if (Array.isArray(parsed)) return parsed.flatMap(parseItem);
+                } catch { }
+              }
+
+              // Try Postgres Array {a,b,c}
+              if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                const content = trimmed.slice(1, -1);
+                if (!content) return [];
+                return content.split(',').map(s => s.trim().replace(/^"|"$|'/g, ''));
+              }
+
+              // Try comma separated if it looks like a list
+              if (trimmed.includes(',')) {
+                return trimmed.split(',').map(s => s.trim());
+              }
+
+              return [trimmed];
+            };
+
+            if (hotel.amenities) {
+              if (Array.isArray(hotel.amenities)) {
+                amenitiesList = hotel.amenities.flatMap(parseItem);
+              } else {
+                amenitiesList = parseItem(hotel.amenities);
+              }
+            }
+
+            // Deduplicate
+            amenitiesList = Array.from(new Set(amenitiesList)).filter(Boolean);
+
+            if (amenitiesList.length > 0) {
+              return (
+                <div className="pt-2 border-t border-border">
+                  <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Amenities:
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {amenitiesList.slice(0, 3).map((amenity, idx) => (
+                      <span
+                        key={`${amenity}-${idx}`}
+                        className="text-xs bg-ocean-light/10 text-ocean-blue px-2 py-1 rounded"
+                      >
+                        {amenity}
+                      </span>
+                    ))}
+                    {amenitiesList.length > 3 && (
+                      <span className="text-xs text-muted-foreground px-2 py-1">
+                        +{amenitiesList.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })()}
         </div>
       </CardContent>
     </Card>

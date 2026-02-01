@@ -8,7 +8,8 @@ from app.api.v1.endpoints import (
     transportation,
     weather,
     reviews,
-    events
+    events,
+    upload
 )
 
 api_router = APIRouter()
@@ -22,3 +23,4 @@ api_router.include_router(transportation.router, prefix="/transportation", tags=
 api_router.include_router(weather.router, prefix="/weather", tags=["Weather"])
 api_router.include_router(reviews.router, prefix="/reviews", tags=["Reviews"])
 api_router.include_router(events.router, prefix="/events", tags=["Events"])
+api_router.include_router(upload.router, prefix="/upload", tags=["Upload"])

@@ -23,6 +23,11 @@ type DestinationFormData = z.infer<typeof destinationSchema>;
 
 const columns: ColumnDef<Destination>[] = [
   { key: 'name', label: 'Tên' },
+  {
+    key: 'image_url',
+    label: 'Hình Ảnh',
+    render: (value) => value ? <img src={value as string} alt="Dest" className="w-16 h-10 object-cover rounded" /> : null
+  },
   { key: 'province', label: 'Tỉnh/Thành Phố' },
   { key: 'region', label: 'Khu Vực' },
   {
@@ -34,6 +39,7 @@ const columns: ColumnDef<Destination>[] = [
 ];
 
 export default function DestinationsPage() {
+  // ... (existing code stays same until return)
   const { data, isLoading, error, fetchData, createItem, updateItem, deleteItem } =
     useAdminCRUD<Destination>({ endpoint: 'destinations' });
 
@@ -60,11 +66,11 @@ export default function DestinationsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this destination?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa điểm đến này?')) return;
     setDeletingId(id);
     const success = await deleteItem(id);
     if (!success) {
-      setSubmitError('Failed to delete destination');
+      setSubmitError('Xóa điểm đến thất bại');
     }
     setDeletingId(null);
   };
@@ -130,8 +136,8 @@ export default function DestinationsPage() {
     },
     {
       name: 'image_url',
-      label: 'URL Hình Ảnh',
-      placeholder: 'https://...',
+      label: 'Hình Ảnh',
+      type: 'image' as const,
       required: false,
     },
   ];
@@ -149,7 +155,7 @@ export default function DestinationsPage() {
         </div>
 
         <DataTable
-          title="Destinations"
+          title="Danh Sách Điểm Đến"
           columns={columns}
           data={data}
           isLoading={isLoading}
@@ -163,10 +169,10 @@ export default function DestinationsPage() {
 
       {/* Form Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'Edit Destination' : 'Add New Destination'}
+              {editingItem ? 'Chỉnh Sửa Điểm Đến' : 'Thêm Điểm Đến Mới'}
             </DialogTitle>
           </DialogHeader>
 

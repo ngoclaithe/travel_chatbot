@@ -10,32 +10,65 @@ import { Tour } from '@/types';
 import { z } from 'zod';
 
 const tourSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  destinations: z.string().min(1, 'Destinations are required'),
-  duration_days: z.coerce.number().min(1, 'Duration must be at least 1 day'),
-  price: z.coerce.number().min(0, 'Price must be positive'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  image_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  name: z.string().min(2, 'Tên phải có ít nhất 2 ký tự'),
+  destinations: z.string().min(1, 'Điểm đến là bắt buộc'),
+  duration_days: z.coerce.number().min(1, 'Thời gian phải ít nhất 1 ngày'),
+  price: z.coerce.number().min(0, 'Giá phải là số dương'),
+  description: z.string().min(10, 'Mô tả phải có ít nhất 10 ký tự'),
+  image_url: z.string().url('Phải là một URL hợp lệ').optional().or(z.literal('')),
 });
 
 type TourFormData = z.infer<typeof tourSchema>;
 
 const columns: ColumnDef<Tour>[] = [
-  { key: 'name', label: 'Tour Name' },
+  { key: 'name', label: 'Tên Tour' },
   {
     key: 'destinations',
-    label: 'Destinations',
-    render: (value) => Array.isArray(value) ? value.join(', ') : String(value),
+    label: 'Điểm Đến',
+    render: (value) => {
+      if (!value) return '';
+      let processed = value;
+      if (typeof value === 'string') {
+        try {
+          if (value.trim().startsWith('[') || value.trim().startsWith('{')) {
+            processed = JSON.parse(value);
+          }
+        } catch { }
+      }
+
+      if (Array.isArray(processed)) {
+        return processed.map((item: any) => {
+          let finalItem = item;
+          if (typeof item === 'string' && (item.trim().startsWith('[') || item.trim().startsWith('{'))) {
+            try {
+              const parsed = JSON.parse(item);
+              if (Array.isArray(parsed)) {
+                return parsed.map((kp: any) => kp.name || kp.title || kp).join(', ');
+              }
+              if (typeof parsed === 'object' && parsed !== null) {
+                finalItem = parsed;
+              }
+            } catch { }
+          }
+
+          if (typeof finalItem === 'object' && finalItem !== null) {
+            return finalItem.name || finalItem.title || JSON.stringify(finalItem);
+          }
+          return String(finalItem);
+        }).join(', ');
+      }
+      return String(value);
+    },
   },
   {
     key: 'duration_days',
-    label: 'Duration',
-    render: (value) => `${value} days`,
+    label: 'Thời Lượng',
+    render: (value) => `${value} ngày`,
   },
   {
     key: 'price',
-    label: 'Price',
-    render: (value) => `$${value}`,
+    label: 'Giá',
+    render: (value) => `${Number(value).toLocaleString('vi-VN')} VNĐ`,
   },
 ];
 
@@ -66,11 +99,11 @@ export default function ToursPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this tour?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa tour này không?')) return;
     setDeletingId(id);
     const success = await deleteItem(id);
     if (!success) {
-      setSubmitError('Failed to delete tour');
+      setSubmitError('Xóa tour thất bại');
     }
     setDeletingId(null);
   };
@@ -93,7 +126,7 @@ export default function ToursPage() {
       setIsDialogOpen(false);
       setEditingItem(null);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to save');
+      setSubmitError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setIsSubmitting(false);
     }
@@ -102,54 +135,56 @@ export default function ToursPage() {
   const formFields = [
     {
       name: 'name',
-      label: 'Tour Name',
-      placeholder: 'e.g., Southeast Asia Explorer',
+      label: 'Tên Tour',
+      placeholder: 'ví dụ: Tour Khám Phá Đông Nam Á',
       required: true,
     },
     {
       name: 'destinations',
-      label: 'Destinations (comma separated)',
+      label: 'Điểm Đến (phân cách bằng dấu phẩy)',
       type: 'textarea' as const,
       placeholder: 'Bangkok, Phuket, Ho Chi Minh',
       required: true,
     },
     {
       name: 'duration_days',
-      label: 'Duration (days)',
+      label: 'Thời Lượng (ngày)',
       type: 'number' as const,
       placeholder: '7',
       required: true,
     },
     {
       name: 'price',
-      label: 'Price per person',
+      label: 'Giá mỗi người',
       type: 'number' as const,
-      placeholder: '1200',
+      placeholder: '1200000',
       required: true,
     },
     {
       name: 'description',
-      label: 'Description',
+      label: 'Mô Tả',
       type: 'textarea' as const,
-      placeholder: 'Describe this tour...',
+      placeholder: 'Mô tả chi tiết về tour...',
       required: true,
     },
     {
       name: 'image_url',
-      label: 'Image URL',
-      placeholder: 'https://...',
+      label: 'Hình Ảnh',
+      type: 'image' as const,
       required: false,
     },
   ];
 
   const getDefaultValues = (tour: Tour | null) => {
     if (!tour) return undefined;
-    
+
     return {
       ...tour,
-      destinations: Array.isArray(tour.destinations) 
-        ? tour.destinations.join(', ')  
-        : tour.destinations || '',
+      destinations: Array.isArray(tour.destinations)
+        ? tour.destinations.join(', ')
+        : typeof tour.destinations === 'string'
+          ? tour.destinations
+          : '',
     };
   };
 
@@ -158,15 +193,15 @@ export default function ToursPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Manage Tours
+            Quản Lý Tour
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Create, read, update, and delete tour packages
+            Tạo, xem, cập nhật và xóa các gói tour du lịch
           </p>
         </div>
 
         <DataTable
-          title="Tours"
+          title="Danh Sách Tour"
           columns={columns}
           data={data}
           isLoading={isLoading}
@@ -183,7 +218,7 @@ export default function ToursPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'Edit Tour' : 'Add New Tour'}
+              {editingItem ? 'Chỉnh Sửa Tour' : 'Thêm Tour Mới'}
             </DialogTitle>
           </DialogHeader>
 

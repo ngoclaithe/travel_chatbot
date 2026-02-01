@@ -107,7 +107,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="w-full text-white border-gray-600 hover:bg-gray-700"
+            className="w-full text-foreground border-gray-600 bg-transparent hover:bg-gray-700 hover:text-white"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Đăng Xuất

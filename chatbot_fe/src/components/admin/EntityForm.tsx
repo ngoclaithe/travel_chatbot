@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import axiosClient from '@/lib/axiosClient';
 
 interface FormField {
   name: string;
   label: string;
-  type?: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'checkbox';
+  type?: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'checkbox' | 'image';
   placeholder?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
@@ -41,11 +42,33 @@ export function EntityForm<T extends z.ZodTypeAny>({
   schema,
 }: EntityFormProps<T>) {
   type FormData = z.infer<T> & FieldValues;
-  
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<FormData>({
     resolver: zodResolver(schema as any),
     defaultValues: defaultValues as any,
   });
+
+  const [uploadLoading, setUploadLoading] = useState(false);
+
+  const handleImageUpload = async (file: File, fieldName: string) => {
+    try {
+      setUploadLoading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axiosClient.post('/upload/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setValue(fieldName as any, response.data.url, { shouldValidate: true, shouldDirty: true });
+    } catch (error) {
+      console.error("Upload failed", error);
+    } finally {
+      setUploadLoading(false);
+    }
+  };
 
   const onSubmitHandler = async (data: FormData) => {
     await onSubmit(data as z.infer<T>);
@@ -56,7 +79,7 @@ export function EntityForm<T extends z.ZodTypeAny>({
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-h-[70vh] overflow-y-auto">
         <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-6">
           {error && (
             <div className="bg-destructive/10 border border-destructive text-destructive p-4 rounded-lg flex items-center gap-3">
@@ -94,6 +117,28 @@ export function EntityForm<T extends z.ZodTypeAny>({
                     </option>
                   ))}
                 </select>
+              ) : field.type === 'image' ? (
+                <div className="space-y-4">
+                  {watch(field.name as any) && (
+                    <div className="relative w-32 h-32 rounded-lg overflow-hidden border">
+                      <img
+                        src={watch(field.name as any)}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <Input
+                    id={field.name}
+                    type="file"
+                    accept="image/*"
+                    disabled={isLoading || uploadLoading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload(file, field.name);
+                    }}
+                  />
+                </div>
               ) : field.type === 'checkbox' ? (
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -109,6 +154,7 @@ export function EntityForm<T extends z.ZodTypeAny>({
                 <Input
                   id={field.name}
                   type={field.type || 'text'}
+                  step={field.type === 'number' ? '0.1' : undefined}
                   placeholder={field.placeholder}
                   disabled={isLoading}
                   {...register(field.name as any)}
@@ -127,7 +173,7 @@ export function EntityForm<T extends z.ZodTypeAny>({
             <Button
               type="submit"
               className="bg-ocean-blue hover:bg-ocean-dark flex-1"
-              disabled={isLoading}
+              disabled={isLoading || uploadLoading}
             >
               {isLoading ? (
                 <>

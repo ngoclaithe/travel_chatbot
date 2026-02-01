@@ -18,7 +18,47 @@ async def create_hotel(hotel: HotelCreate, db=Depends(get_db)):
 async def get_hotels(skip: int = 0, limit: int = 100, db=Depends(get_db)):
     query = hotels.select().offset(skip).limit(limit)
     results = await db.fetch_all(query)
-    return [dict(r) for r in results]  
+    
+    processed_results = []
+    for r in results:
+        item = dict(r)
+        amenities = item.get("amenities")
+        
+        # Handle amenities anomalies
+        if amenities:
+            # Case 1: List of characters ["{", "\"", "s", ...] -> Join and Parse
+            if isinstance(amenities, list) and len(amenities) > 0 and len(str(amenities[0])) == 1:
+                try:
+                    joined = "".join(str(x) for x in amenities)
+                    import json
+                    if joined.strip().startswith('{') or joined.strip().startswith('['):
+                        parsed = json.loads(joined)
+                        if isinstance(parsed, dict):
+                            item["amenities"] = [k for k, v in parsed.items() if v]
+                        elif isinstance(parsed, list):
+                            item["amenities"] = parsed
+                except Exception:
+                    pass
+            
+            # Case 2: String "{...}" or "[...]" -> Parse
+            elif isinstance(amenities, str):
+                try:
+                    import json
+                    if amenities.strip().startswith('{') or amenities.strip().startswith('['):
+                        parsed = json.loads(amenities)
+                        if isinstance(parsed, dict):
+                            item["amenities"] = [k for k, v in parsed.items() if v]
+                        elif isinstance(parsed, list):
+                            item["amenities"] = parsed
+                    elif "," in amenities:
+                        item["amenities"] = [x.strip() for x in amenities.split(",")]
+                    else:
+                        item["amenities"] = [amenities]
+                except Exception:
+                    item["amenities"] = [amenities]
+
+        processed_results.append(item)
+    return processed_results  
 
 
 @router.get("/{hotel_id}", response_model=dict)
@@ -27,7 +67,40 @@ async def get_hotel(hotel_id: int, db=Depends(get_db)):
     result = await db.fetch_one(query)
     if not result:
         raise HTTPException(status_code=404, detail="Hotel not found")
-    return dict(result) 
+    
+    item = dict(result)
+    amenities = item.get("amenities")
+    
+    if amenities:
+        if isinstance(amenities, list) and len(amenities) > 0 and len(str(amenities[0])) == 1:
+            try:
+                joined = "".join(str(x) for x in amenities)
+                import json
+                if joined.strip().startswith('{') or joined.strip().startswith('['):
+                    parsed = json.loads(joined)
+                    if isinstance(parsed, dict):
+                        item["amenities"] = [k for k, v in parsed.items() if v]
+                    elif isinstance(parsed, list):
+                        item["amenities"] = parsed
+            except Exception:
+                pass
+        elif isinstance(amenities, str):
+            try:
+                import json
+                if amenities.strip().startswith('{') or amenities.strip().startswith('['):
+                    parsed = json.loads(amenities)
+                    if isinstance(parsed, dict):
+                        item["amenities"] = [k for k, v in parsed.items() if v]
+                    elif isinstance(parsed, list):
+                        item["amenities"] = parsed
+                elif "," in amenities:
+                    item["amenities"] = [x.strip() for x in amenities.split(",")]
+                else:
+                     item["amenities"] = [amenities]
+            except:
+                pass
+            
+    return item 
 
 
 @router.put("/{hotel_id}", response_model=dict)

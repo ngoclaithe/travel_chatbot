@@ -17,16 +17,56 @@ interface TourCardProps {
 }
 
 export const TourCard: React.FC<TourCardProps> = ({ tour }) => {
-  const formatDestinations = (d: string | string[] | Record<string, string> | Record<string, string>[]) => {
+  const formatDestinations = (d: any) => {
     if (!d) return '';
-    if (typeof d === 'string') return d;
-    if (Array.isArray(d)) {
-      if (d.every((item) => typeof item === 'string')) return (d as string[]).join(', ');
-      return (d as Record<string, string>[])
-        .map((item) => item?.name ?? item?.title ?? String(item))
+
+    let processed = d;
+    // 1. Try to parse if strictly a string
+    if (typeof d === 'string') {
+      try {
+        if (d.trim().startsWith('[') || d.trim().startsWith('{')) {
+          processed = JSON.parse(d);
+        }
+      } catch (e) {
+        // Keep as string
+      }
+    }
+
+    if (typeof processed === 'string') return processed;
+
+    // 2. Handle object (single destination)
+    if (!Array.isArray(processed) && typeof processed === 'object' && processed !== null) {
+      return processed.name || processed.title || String(processed);
+    }
+
+    // 3. Handle Array
+    if (Array.isArray(processed)) {
+      return processed
+        .map((item) => {
+          if (typeof item === 'string') {
+            // Check if the item ITSELF is a JSON string
+            try {
+              if (item.trim().startsWith('{') || item.trim().startsWith('[')) {
+                const parsedItem = JSON.parse(item);
+                if (Array.isArray(parsedItem)) {
+                  return parsedItem.map((sub: any) => sub.name || sub.title || sub).join(', ');
+                }
+                if (typeof parsedItem === 'object' && parsedItem !== null) {
+                  return parsedItem.name || parsedItem.title || String(parsedItem);
+                }
+              }
+            } catch { }
+            return item;
+          }
+          if (typeof item === 'object' && item !== null) {
+            return item.name || item.title || String(item);
+          }
+          return String(item);
+        })
         .join(', ');
     }
-    return String(d);
+
+    return String(processed);
   };
 
   return (
@@ -39,6 +79,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour }) => {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover hover:scale-105 transition-transform"
+            unoptimized
           />
         </div>
       )}
