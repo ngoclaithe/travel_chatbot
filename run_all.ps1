@@ -5,8 +5,8 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$root`"; . .
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$root`"; . .\.venv\Scripts\Activate.ps1; cd backend; python run.py"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$root\chatbot_fe`"; npm run dev"
 
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "flutter emulators --launch Medium_Phone_API_36.1 --cold"
+# Start-Process powershell -ArgumentList "-NoExit", "-Command", "flutter emulators --launch Medium_Phone_API_36.1 --cold"
 
-Start-Sleep -Seconds 60
+# Start-Sleep -Seconds 60
 
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$root\chatbot_mb`"; flutter run -d android"
+# Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$root\chatbot_mb`"; flutter run -d android"
